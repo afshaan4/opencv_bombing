@@ -5,7 +5,7 @@ import imutils
 import numpy as np
 
 class App:
-    def __init__(self, video_src):
+    def __init__(self, videoSrc):
         # limits of green acceptable
         self.greenLower = (29, 86, 6)
         self.greenUpper = (64, 255, 255)
@@ -14,7 +14,7 @@ class App:
          handle getting the camera
          done like this coz we need the size of the frame
         '''
-        source = str(video_src).strip()
+        source = str(videoSrc).strip()
         # Win32: handle drive letter ('c:', ...)
         source = re.sub(r'(^|=)([a-zA-Z]):([/\\a-zA-Z0-9])', r'\1?disk\2?\3', source)
         chunks = source.split(':')
@@ -62,6 +62,7 @@ class App:
                 ((x, y), radius) = cv2.minEnclosingCircle(c)
                 M = cv2.moments(c)
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+                print(center) # remove
 
                 # only select if the ball is bigg enough
                 if radius > 10:
@@ -80,11 +81,11 @@ class App:
 
 def main():
     try:
-        video_src = sys.argv[1]
+        videoSrc = sys.argv[1]
     except:
-        video_src = 0
+        videoSrc = 0
 
-    App(video_src).run()
+    App(videoSrc).run()
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
