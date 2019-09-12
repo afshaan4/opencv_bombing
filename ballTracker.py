@@ -34,7 +34,8 @@ class App:
 
 
     def run(self):
-        while True:
+        running = True
+        while running:
             ret, frame = self.cam.read()
             # resize, blur, convert to HSV colorspace
             frame = imutils.resize(frame, width=600)
@@ -75,8 +76,7 @@ class App:
             cv2.imshow("BRUH", frame)
             k = cv2.waitKey(30)
             if k == 27:
-                break
-
+                running = False
 
 
 def main():
