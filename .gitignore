@@ -1,3 +1,3 @@
 catm3m3s/
 
-.ipynb_checkpoints/
+*.ipynb_checkpoints/

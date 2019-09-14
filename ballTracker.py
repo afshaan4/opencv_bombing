@@ -2,7 +2,6 @@ import cv2
 import sys
 import re
 import imutils
-import numpy as np
 
 class App:
     def __init__(self, videoSrc):
