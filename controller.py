@@ -20,10 +20,11 @@ class Controller:
         while running:
             ################################
             # get all the data
+            ################################
             ret, frame = self.model.getFrame()
             distance = self.model.getDistance()
 
-            # coz data is not being sent in sync and is sometimes corrupted
+            # coz distance is not being sent in sync and is sometimes corrupted
             if distance == -1:
                 distance = oldDistance
             else:
@@ -33,15 +34,15 @@ class Controller:
             scaleRuleUnit = self.model.calcScaleRuleUnit(self.scaleUnit,
                 self.focalLen, distance)
             scaleRuleUnit *= self.pixelsPerCM
-            #################################
 
-
-
-            self.view.showFrame(frame, scaleRuleUnit)
+            target = self.model.trackTarget(frame)
+            
+            self.view.showFrame(frame, scaleRuleUnit, target)
 
             # yeet outta here
             keyEvent = cv2.waitKey(30)
             if keyEvent == 27:
+                # TODO: destroy windows
                 running = False
 
 

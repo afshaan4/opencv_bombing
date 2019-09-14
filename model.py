@@ -19,7 +19,7 @@ class Model:
         
         '''
          handle getting the camera
-         done like this coz we need the size of the frame
+         done like this because we need the size of the frame
         '''
         source = str(videoSrc).strip()
         # Win32: handle drive letter ('c:', ...)
@@ -60,8 +60,35 @@ class Model:
         return distance
 
 
-    def trackItem(self):
-        pass
+    def trackTarget(self, frame):
+        # resize, blur, convert to HSV colorspace
+        frame = imutils.resize(frame, width=600)
+        blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+        hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+
+        # make a mask for green and remove small blobs that are noise
+        mask = cv2.inRange(hsv, self.greenLower, self.greenUpper)
+        mask = cv2.erode(mask, None, iterations=2)
+        mask = cv2.dilate(mask, None, iterations=2)
+
+        # find contours in the mask and try to find the ball
+        cntrs = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, 
+            cv2.CHAIN_APPROX_SIMPLE)
+        cntrs = imutils.grab_contours(cntrs)
+        center = None
+
+        if len(cntrs) > 0:
+            # find the largest contour in the mask, then use it to compute
+            # the minimum enclosing circle and centroid
+            c = max(cntrs, key = cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+            M = cv2.moments(c)
+            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+
+            # x and y are the coords for the center of the min enclosing circle
+            return int(x), int(y), int(radius), center, mask
+        else:
+            return (0, 0, 0, 0, mask)
 
 
     # USE ONE UNIT FOR ALL ARGS, cm in this case
@@ -72,5 +99,5 @@ class Model:
             return(size * f / dist)
 
 
-    def calcDistance(self):
+    def calcTargetDistance(self):
         pass
