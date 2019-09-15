@@ -34,3 +34,4 @@ class View:
         # show the mask and frame
         cv2.imshow("target mask", mask)
         cv2.imshow("camera feed", frame)
+        

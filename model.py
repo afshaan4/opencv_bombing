@@ -45,7 +45,7 @@ class Model:
         ret, frame = self.cam.read()
         frame = imutils.resize(frame, width=600)
         height, width = frame.shape[:2]
-        return frame, height, width
+        return frame, width, height
 
 
     def getDistance(self):
@@ -65,8 +65,7 @@ class Model:
 
     def trackTarget(self, image):
         frame = image[0]
-        # resize, blur, convert to HSV colorspace
-        # frame = imutils.resize(frame, width=600)
+        # blur and convert to HSV colorspace
         blurred = cv2.GaussianBlur(frame, (11, 11), 0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
@@ -112,3 +111,4 @@ class Model:
         distanceVector = (targetCenter[0] - imageCenter[0],
             targetCenter[1] - imageCenter[1])
         return distanceVector, imageCenter
+        
