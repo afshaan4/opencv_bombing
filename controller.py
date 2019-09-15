@@ -18,10 +18,8 @@ class Controller:
         oldDistance = 0
         running = True
         while running:
-            ################################
             # get all the data
-            ################################
-            ret, frame = self.model.getFrame()
+            frame = self.model.getFrame()
             distance = self.model.getDistance()
 
             # coz distance is not being sent in sync and is sometimes corrupted
@@ -35,14 +33,21 @@ class Controller:
                 self.focalLen, distance)
             scaleRuleUnit *= self.pixelsPerCM
 
+            # find target
             target = self.model.trackTarget(frame)
-            
-            self.view.showFrame(frame, scaleRuleUnit, target)
+
+            # calculate distance to target
+            distVector, imgCenter = self.model.calcTargetDistance(target[3],
+                frame[1], frame[2])
+
+            # display all that stuff
+            self.view.showDistance(frame, target[3], imgCenter)
+            self.view.showTarget(frame, target)
+            self.view.showFrame(frame, scaleRuleUnit, target[4])
 
             # yeet outta here
             keyEvent = cv2.waitKey(30)
             if keyEvent == 27:
-                # TODO: destroy windows
                 running = False
 
 
@@ -55,6 +60,7 @@ def main():
         print('WARNING: serial port not specified')
 
     Controller(Model, View, vidSrc, serPort).run()
+    cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     main()

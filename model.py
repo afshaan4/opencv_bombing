@@ -40,9 +40,12 @@ class Model:
             self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
 
 
+    # return image and image dimensions
     def getFrame(self):
         ret, frame = self.cam.read()
-        return ret, frame
+        frame = imutils.resize(frame, width=600)
+        height, width = frame.shape[:2]
+        return frame, height, width
 
 
     def getDistance(self):
@@ -60,9 +63,10 @@ class Model:
         return distance
 
 
-    def trackTarget(self, frame):
+    def trackTarget(self, image):
+        frame = image[0]
         # resize, blur, convert to HSV colorspace
-        frame = imutils.resize(frame, width=600)
+        # frame = imutils.resize(frame, width=600)
         blurred = cv2.GaussianBlur(frame, (11, 11), 0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
@@ -88,7 +92,7 @@ class Model:
             # x and y are the coords for the center of the min enclosing circle
             return int(x), int(y), int(radius), center, mask
         else:
-            return (0, 0, 0, 0, mask)
+            return (0, 0, 0, (0, 0), mask)
 
 
     # USE ONE UNIT FOR ALL ARGS, cm in this case
@@ -99,5 +103,12 @@ class Model:
             return(size * f / dist)
 
 
-    def calcTargetDistance(self):
-        pass
+    # returns the center of the image and the distance to target
+    # as a vector originating at the center of the image
+    # the vector is of form (i^, j^)
+    def calcTargetDistance(self, targetCenter, imgWidth, imgHeight):
+        # x: width, y: height
+        imageCenter = (int(imgWidth / 2), int(imgHeight / 2))
+        distanceVector = (targetCenter[0] - imageCenter[0],
+            targetCenter[1] - imageCenter[1])
+        return distanceVector, imageCenter

@@ -11,7 +11,7 @@ class App:
 
         '''
          handle getting the camera
-         done like this coz we need the size of the frame
+         done like this because we need the size of the frame
         '''
         source = str(videoSrc).strip()
         # Win32: handle drive letter ('c:', ...)
