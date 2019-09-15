@@ -41,7 +41,7 @@ class Controller:
                 frame[1], frame[2], scaleRuleLen, self.scaleLength)
 
             # display all that stuff
-            self.view.showDistance(frame, target[3], imgCenter)
+            self.view.showDistance(frame, target[3], imgCenter, distVector)
             self.view.showTarget(frame, target)
             self.view.showFrame(frame, scaleRuleLen, target[4])
 

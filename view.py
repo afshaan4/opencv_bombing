@@ -10,8 +10,9 @@ class View:
         self.red = (55, 12, 255)
         self.blue = (255, 55, 0)
 
-    def showDistance(self, frame, targetCenter, imgCenter):
+    def showDistance(self, frame, targetCenter, imgCenter, distVector):
         image = frame[0]
+        print(distVector)
         cv2.line(image, imgCenter, targetCenter, self.blue, 2)
         cv2.circle(image, imgCenter, 2, self.green, -1)
 

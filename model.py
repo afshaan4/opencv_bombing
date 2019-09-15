@@ -121,6 +121,5 @@ class Model:
             distanceVector = (distanceVector[0] * scaleLen, distanceVector[1] * scaleLen)
         else:
             distanceVector = (None, None)
-        print(distanceVector)
         return distanceVector, imageCenter
         
