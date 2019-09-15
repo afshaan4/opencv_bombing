@@ -9,7 +9,7 @@ class Controller:
         self.model = model(videoSrc, serialPort)
         self.view = view()
         # camera parameters, change these for your camera
-        self.scaleUnit = 10 # size of unit for scale rule in cm
+        self.scaleLength = 10 # size of unit for scale rule in cm
         self.focalLen = 0.6
         self.pixelsPerCM = 1950
 
@@ -29,21 +29,21 @@ class Controller:
                 oldDistance = distance
 
             # calculate the size of 10cm in the image
-            scaleRuleUnit = self.model.calcScaleRuleUnit(self.scaleUnit,
+            scaleRuleLen = self.model.calcObjImageSize(self.scaleLength,
                 self.focalLen, distance)
-            scaleRuleUnit *= self.pixelsPerCM
+            scaleRuleLen *= self.pixelsPerCM
 
             # find target
             target = self.model.trackTarget(frame)
 
             # calculate distance to target
             distVector, imgCenter = self.model.calcTargetDistance(target[3],
-                frame[1], frame[2])
+                frame[1], frame[2], scaleRuleLen, self.scaleLength)
 
             # display all that stuff
             self.view.showDistance(frame, target[3], imgCenter)
             self.view.showTarget(frame, target)
-            self.view.showFrame(frame, scaleRuleUnit, target[4])
+            self.view.showFrame(frame, scaleRuleLen, target[4])
 
             # yeet outta here
             keyEvent = cv2.waitKey(30)

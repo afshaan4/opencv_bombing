@@ -25,11 +25,11 @@ class View:
             cv2.circle(image, center, 5, self.red, -1)
 
 
-    def showFrame(self, image, scaleRuleUnit, mask):
-        frame, imageHeight, imageWidth = image
+    def showFrame(self, image, scaleRuleLen, mask):
+        frame, imageWidth, imageHeight = image
         # draw scale rule
-        cv2.line(frame, (self.padding, imageHeight - self.padding), 
-            (self.padding + int(scaleRuleUnit), imageHeight - self.padding), self.red, 2) 
+        cv2.line(frame, (self.padding, imageHeight - self.padding),
+            (self.padding + int(scaleRuleLen), imageHeight - self.padding), self.red, 2) 
 
         # show the mask and frame
         cv2.imshow("target mask", mask)

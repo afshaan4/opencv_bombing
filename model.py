@@ -95,20 +95,32 @@ class Model:
 
 
     # USE ONE UNIT FOR ALL ARGS, cm in this case
-    def calcScaleRuleUnit(self, size, f, dist):
-        if dist < 1:
+    # calculates the size of the *image* of an object of known size
+    def calcObjImageSize(self, size, focalLen, distance):
+        if distance < 1:
             return 0
         else:
-            return(size * f / dist)
+            return(size * focalLen / distance)
 
 
-    # returns the center of the image and the distance to target
-    # as a vector originating at the center of the image
-    # the vector is of form (i^, j^)
-    def calcTargetDistance(self, targetCenter, imgWidth, imgHeight):
-        # x: width, y: height
+    # returns:
+    #   - imageCenter: the coordinates for the center of the image
+    #   - distanceVector: the distance to the tracked object from the center
+    #       of the image in centimeters in the form (i^, j^)
+    #       i^ is horizontal, j^ is vertical
+    def calcTargetDistance(self, targetCenter, imgWidth, imgHeight,
+        scaleRuleLen, scaleLen):
         imageCenter = (int(imgWidth / 2), int(imgHeight / 2))
+        # distance in pixels
         distanceVector = (targetCenter[0] - imageCenter[0],
             targetCenter[1] - imageCenter[1])
+        # distance in centimeters
+        if scaleRuleLen > 1:
+            distanceVector = (int(distanceVector[0]) / int(scaleRuleLen),
+                int(distanceVector[1]) / int(scaleRuleLen))
+            distanceVector = (distanceVector[0] * scaleLen, distanceVector[1] * scaleLen)
+        else:
+            distanceVector = (None, None)
+        print(distanceVector)
         return distanceVector, imageCenter
         
