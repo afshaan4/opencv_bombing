@@ -5,8 +5,8 @@ import sys
 
 class Controller:
     """docstring for Controller"""
-    def __init__(self, model, view, videoSrc, serialPort):
-        self.model = model(videoSrc, serialPort)
+    def __init__(self, model, view, videoSrc, sensor, serialPort):
+        self.model = model(videoSrc, int(sensor), serialPort)
         self.view = view()
         # camera parameters, change these for your camera
         self.scaleLength = 10 # size of unit for scale rule in cm
@@ -15,22 +15,22 @@ class Controller:
 
 
     def run(self):
-        oldDistance = 0
+        oldAltitude = 0
         running = True
         while running:
             # get all the data
             frame = self.model.getFrame()
-            distance = self.model.getDistance()
+            altitude = self.model.getAltitude()
 
-            # coz distance is not being sent in sync and is sometimes corrupted
-            if distance == -1:
-                distance = oldDistance
+            # coz altitude is not being sent in sync and is sometimes corrupted
+            if altitude == -1:
+                altitude = oldAltitude
             else:
-                oldDistance = distance
+                oldAltitude = altitude
 
             # calculate the size of 10cm in the image
             scaleRuleLen = self.model.calcObjImageSize(self.scaleLength,
-                self.focalLen, distance)
+                self.focalLen, altitude)
             scaleRuleLen *= self.pixelsPerCM
 
             # find target
@@ -54,12 +54,17 @@ class Controller:
 def main():
     try:
         vidSrc = sys.argv[1]
-        serPort = sys.argv[2]
+        sensor = sys.argv[2]
+        serPort = sys.argv[3]
     except:
         vidSrc = 0
-        print('WARNING: serial port not specified')
+        if not sensor:
+            sensor = 1
+            print('WARNING: no sensor specified, defaulting to sensor 1(arduino)')
+        elif not serPort:
+            print('WARNING: serial port not specified')
 
-    Controller(Model, View, vidSrc, serPort).run()
+    Controller(Model, View, vidSrc, sensor, serPort).run()
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':

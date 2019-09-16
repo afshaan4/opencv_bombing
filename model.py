@@ -8,31 +8,41 @@ class Model:
     Model reads from sensors and does all the calculations
     Args:
     - videoSrc: camera that opencv will use
+    - altitudeSensor: which sensor to get altitude readings from
+                      1 = an arduino connected over serial port
+                      2 = a directly connected HC-SR04 ultrasonic rangefinder
     - serialPort: the serial port that the arduino is connected to
-    - baudRate: baud rate for serial communication with the arduino
     """
-    def __init__(self, videoSrc, serialPort, baudRate = 9600):
+    def __init__(self, videoSrc, altitudeSensor, serialPort):
         # limits of green acceptable
         self.greenLower = (29, 86, 6)
         self.greenUpper = (64, 255, 255)
-        self.arduino = serial.Serial(str(serialPort), int(baudRate), timeout=.1)
-        
+        # handle selecting the altitude sensor
+        if altitudeSensor == 1:
+            # we read from the arduino
+            self.sensor = serial.Serial(str(serialPort), 9600, timeout=.1)
+        elif altitudeSensor == 2:
+            # we read from a directly connected sensor
+            self.sensor = None
+        else:
+            print('ERROR: no sensor specified')
+
         '''
          handle getting the camera
          done like this because we need the size of the frame
         '''
-        source = str(videoSrc).strip()
+        src = str(videoSrc).strip()
         # Win32: handle drive letter ('c:', ...)
-        source = re.sub(r'(^|=)([a-zA-Z]):([/\\a-zA-Z0-9])', r'\1?disk\2?\3', source)
-        chunks = source.split(':')
+        src = re.sub(r'(^|=)([a-zA-Z]):([/\\a-zA-Z0-9])', r'\1?disk\2?\3', src)
+        chunks = src.split(':')
         chunks = [re.sub(r'\?disk([a-zA-Z])\?', r'\1:', s) for s in chunks]
 
-        source = chunks[0]
-        try: source = int(source)
+        src = chunks[0]
+        try: src = int(src)
         except ValueError: pass
         params = dict( s.split('=') for s in chunks[1:] )
 
-        self.cam = cv2.VideoCapture(source)
+        self.cam = cv2.VideoCapture(src)
         # add size to capture
         if 'size' in params:
             w, h = map(int, params['size'].split('x'))
@@ -48,19 +58,20 @@ class Model:
         return frame, width, height
 
 
-    def getDistance(self):
-        # read and trim the distance reading
-        distance = self.arduino.readline()[:-2]
-        if distance:
+    def getAltitude(self):
+        # read and trim the altitude reading
+        altitude = self.sensor.readline()[:-2]
+        # sensor = self.readAltiudeSensor(1, self.serialPort)
+        if altitude:
             # it has a bunch of garbage attached to it, get rid of that
-            distance = str(distance)
-            distance = distance.split('\'')
-            distance = int(distance[1])
+            altitude = str(altitude)
+            altitude = altitude.split('\'')
+            altitude = int(altitude[1])
         else:
             # if we get something that is NOT a number
-            distance = -1
+            altitude = -1
 
-        return distance
+        return altitude
 
 
     def trackTarget(self, image):
