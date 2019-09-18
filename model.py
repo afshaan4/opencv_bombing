@@ -126,11 +126,15 @@ class Model:
         distanceVector = (targetCenter[0] - imageCenter[0],
             targetCenter[1] - imageCenter[1])
         # distance in centimeters
-        if scaleRuleLen > 1:
+        if scaleRuleLen > 0:
             distanceVector = (int(distanceVector[0]) / int(scaleRuleLen),
                 int(distanceVector[1]) / int(scaleRuleLen))
             distanceVector = (distanceVector[0] * scaleLen, distanceVector[1] * scaleLen)
         else:
             distanceVector = (None, None)
         return distanceVector, imageCenter
-        
+
+
+    # returns targets velocity vector relative to the center of the image
+    def calcTargetVelocity(self, deltaDistance, deltaTime):
+        return (deltaDistance[0] / deltaTime, deltaDistance[1] / deltaTime)

@@ -22,26 +22,26 @@ class View:
             lineType = self.fontLine)
 
 
-    # draws a line from the center of the image to the target, also displays
-    # distance to target in centimeters
-    def showDistance(self, frame, targetCenter, imgCenter, distVector):
+    # draws a line from the center of the image to the target, draws a circle
+    # around the target, also displays distance to target in centimeters
+    def showTarget(self, frame, target, imgCenter, distVector):
         image = frame[0]
+        x, y, radius, center, mask = target
         textPos = (self.padding, self.padding * 2)
         if distVector[0]:
             distVector = (int(distVector[0]), int(distVector[1]))
 
-        cv2.line(image, imgCenter, targetCenter, self.blue, 2)
-        cv2.circle(image, imgCenter, 2, self.green, -1)
-        self.drawText(image, textPos, "target distance " + str(distVector) + "cm")
-
-
-    def showTarget(self, frame, target):
-        image = frame[0]
-        x, y, radius, center, mask = target
-        # draw the target tracker
         if radius > 10:
+            # draw the line to the target
+            cv2.line(image, imgCenter, center, self.blue, 2)
+            cv2.circle(image, imgCenter, 2, self.green, -1)
+            self.drawText(image, textPos, "target distance " + str(distVector) + "cm")    
+            # draw the target tracker
             cv2.circle(image, (int(x), int(y)), int(radius), self.green, 2)
             cv2.circle(image, center, 5, self.red, -1)
+        else:
+            self.drawText(image, textPos, "target distance " + str(None))    
+
 
 
     def showFrame(self, frame, scaleRuleLen, mask):
