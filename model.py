@@ -102,7 +102,7 @@ class Model:
             # x and y are the coords for the center of the min enclosing circle
             return int(x), int(y), int(radius), center, mask
         else:
-            return (0, 0, 0, (0, 0), mask)
+            return (None, None, 0, (None, None), mask)
 
 
     # USE ONE UNIT FOR ALL ARGS, cm in this case
@@ -122,17 +122,19 @@ class Model:
     def calcTargetDistance(self, targetCenter, imgWidth, imgHeight,
         scaleRuleLen, scaleLen):
         imageCenter = (int(imgWidth / 2), int(imgHeight / 2))
-        # distance in pixels
-        distanceVector = (targetCenter[0] - imageCenter[0],
-            targetCenter[1] - imageCenter[1])
-        # distance in centimeters
-        if scaleRuleLen > 0:
+
+        # make sure we don't divide by zero or use None in calculations
+        if targetCenter[0] and scaleRuleLen > 0:
+            # distance in pixels
+            distanceVector = (targetCenter[0] - imageCenter[0],
+                targetCenter[1] - imageCenter[1])
+            # distance in centimeters
             distanceVector = (int(distanceVector[0]) / int(scaleRuleLen),
                 int(distanceVector[1]) / int(scaleRuleLen))
             distanceVector = (distanceVector[0] * scaleLen, distanceVector[1] * scaleLen)
+            return distanceVector, imageCenter
         else:
-            distanceVector = (None, None)
-        return distanceVector, imageCenter
+            return ((None, None), imageCenter)
 
 
     # returns targets velocity vector relative to the center of the image

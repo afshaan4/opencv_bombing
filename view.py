@@ -43,7 +43,6 @@ class View:
             self.drawText(image, textPos, "target distance " + str(None))    
 
 
-
     def showFrame(self, frame, scaleRuleLen, mask):
         image, imageWidth, imageHeight = frame
         textPos = (self.padding - 5, imageHeight - self.padding)
