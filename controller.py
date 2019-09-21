@@ -53,10 +53,10 @@ class Controller:
 
             targetVelocity = self.model.calcTargetVelocity(deltaDistance,
                 curTime - oldTime)
-            print(int(targetVelocity[0]), int(targetVelocity[1]))
 
             # display all that stuff
             self.view.showTarget(frame, target, imgCenter, distVector)
+            self.view.showTargetVelocity(frame, targetVelocity)
             self.view.showFrame(frame, scaleRuleLen, target[4])
 
             # update old vals 

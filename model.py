@@ -138,5 +138,14 @@ class Model:
 
 
     # returns targets velocity vector relative to the center of the image
+    # velocity is in cm/second
     def calcTargetVelocity(self, deltaDistance, deltaTime):
-        return (deltaDistance[0] / deltaTime, deltaDistance[1] / deltaTime)
+        # 1 second / deltaTime = multiplier
+        # so to get speed in centimeter/second just:
+        # (deltaDistance * multiplier) / (deltaTime * multiplier)
+        second = 1
+        multiplier = second / deltaTime
+
+        xSpeed = (deltaDistance[0] * multiplier) / (deltaTime * multiplier)
+        ySpeed = (deltaDistance[1] * multiplier) / (deltaTime * multiplier)
+        return (xSpeed, ySpeed)

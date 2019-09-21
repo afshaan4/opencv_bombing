@@ -40,7 +40,14 @@ class View:
             cv2.circle(image, (int(x), int(y)), int(radius), self.green, 2)
             cv2.circle(image, center, 5, self.red, -1)
         else:
-            self.drawText(image, textPos, "target distance " + str(None))    
+            self.drawText(image, textPos, "target distance " + str(None))
+
+
+    def showTargetVelocity(self, frame, velocity):
+        image = frame[0]
+        textPos = (self.padding, self.padding * 4)
+        velocity = (round(velocity[0], 1), round(velocity[1], 1))
+        self.drawText(image, textPos, "target velocity " + str(velocity) + "cm/s")
 
 
     def showFrame(self, frame, scaleRuleLen, mask):
