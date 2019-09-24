@@ -3,11 +3,15 @@ import imutils
 import re
 import serial
 import time
+import os
 
 class Model:
     """
     Model reads from sensors and does all the calculations
     """
+    # bruh way of doing this but eyyyyy
+    if os.uname()[4].startswith("arm"):
+        import RPi.GPIO as gpio
 
     def __init__(self, videoSrc, altitudeSensor, serialPort):
         # limits of green acceptable
@@ -21,7 +25,6 @@ class Model:
             self.sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
         elif altitudeSensor == 2:
             # read directly from the sensor
-            import RPi.GPIO as gpio
             gpio.setmode(gpio.BCM)
             # trigger and echo pins of the ultrasonic rangefinder
             self.trigger = 23
