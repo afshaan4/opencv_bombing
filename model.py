@@ -5,14 +5,15 @@ import serial
 import time
 import os
 
+# bruh way of doing this but eyyyyy
+if os.uname()[4].startswith("arm"):
+    import RPi.GPIO as gpio
+
+
 class Model:
     """
     Model reads from sensors and does all the calculations
     """
-    # bruh way of doing this but eyyyyy
-    if os.uname()[4].startswith("arm"):
-        import RPi.GPIO as gpio
-
     def __init__(self, videoSrc, altitudeSensor, serialPort):
         # limits of green acceptable
         self.greenLower = (29, 86, 6)
@@ -24,7 +25,6 @@ class Model:
             # we read from the arduino
             self.sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
         elif altitudeSensor == 2:
-            # read directly from the sensor
             gpio.setmode(gpio.BCM)
             # trigger and echo pins of the ultrasonic rangefinder
             self.trigger = 23
@@ -97,6 +97,7 @@ class Model:
             # sound goes 340 m/s or 29 microseconds per centimeter.
             # The ping travels out and back, so altitude is half the time
             altitude = pulse / 29 / 2
+            print(altitude)
 
         return altitude
 
