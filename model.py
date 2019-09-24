@@ -2,6 +2,7 @@ import cv2
 import imutils
 import re
 import serial
+import time
 
 class Model:
     """
@@ -19,13 +20,26 @@ class Model:
         self.greenUpper = (64, 255, 255)
         self.serialPort = serialPort
         self.altitudeSensor = altitudeSensor
+        # have to do this only once
+        if altitudeSensor == 1:
+            # we read from the arduino
+            self.sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
+        elif altitudeSensor == 2:
+            # read directly from the sensor
+            import RPi.GPIO as self.gpio
+            self.gpio.setmode(gpio.BCM)
+            # trigger and echo pins of the ultrasonic rangefinder
+            self.trigger = 23
+            self.echo = 24
+            self.gpio.setup(self.trigger, self.gpio.OUT)
+            self.gpio.setup(self.echo, self.gpio.IN)
 
         '''
          handle getting the camera
          done like this because we need the size of the frame
         '''
         src = str(videoSrc).strip()
-        # Win32: handle drive letter ('c:', ...)
+        # Win32: handle drive lett-er ('c:', ...)
         src = re.sub(r'(^|=)([a-zA-Z]):([/\\a-zA-Z0-9])', r'\1?disk\2?\3', src)
         chunks = src.split(':')
         chunks = [re.sub(r'\?disk([a-zA-Z])\?', r'\1:', s) for s in chunks]
@@ -55,8 +69,7 @@ class Model:
         # selecting the altitude sensor
         if self.altitudeSensor == 1:
             # we read from the arduino
-            sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
-            altitude = sensor.readline()[:-2]
+            altitude = self.sensor.readline()[:-2]
             if altitude:
                 # it has a bunch of garbage attached to it, get rid of that
                 altitude = str(altitude)
@@ -65,9 +78,27 @@ class Model:
             else:
                 altitude = -1
         elif self.altitudeSensor == 2:
-            # we read from a directly connected sensor
-            self.sensor = None
-            altitude = -1
+            pulseStart = 0
+            pulseEnd = 0
+
+            # send pulse
+            self.gpio.output(self.trigger, False)
+            time.sleep(0.000002) # 2 microseconds
+            self.gpio.output(self.trigger, True)
+            time.sleep(0.000005) # 5 microseconds
+            self.gpio.output(self.trigger, False)
+
+            # count how long echo is HIGH
+            while self.gpio.input(self.echo) == 0:
+                pulseStart = time.time()
+
+            while self.gpio.input(self.echo) == 1:
+                pulseEnd = time.time()
+
+            pulse = pulseEnd - pulseStart
+            # sound goes 340 m/s or 29 microseconds per centimeter.
+            # The ping travels out and back, so altitude is half the time
+            altitude = pulse / 29 / 2
 
         return altitude
 
