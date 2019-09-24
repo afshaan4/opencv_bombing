@@ -17,15 +17,8 @@ class Model:
         # limits of green acceptable
         self.greenLower = (29, 86, 6)
         self.greenUpper = (64, 255, 255)
-        # handle selecting the altitude sensor
-        if altitudeSensor == 1:
-            # we read from the arduino
-            self.sensor = serial.Serial(str(serialPort), 9600, timeout=.1)
-        elif altitudeSensor == 2:
-            # we read from a directly connected sensor
-            self.sensor = None
-        else:
-            print('ERROR: no sensor specified')
+        self.serialPort = serialPort
+        self.altitudeSensor = altitudeSensor
 
         '''
          handle getting the camera
@@ -59,16 +52,21 @@ class Model:
 
 
     def getAltitude(self):
-        # read and trim the altitude reading
-        altitude = self.sensor.readline()[:-2]
-        # sensor = self.readAltiudeSensor(1, self.serialPort)
-        if altitude:
-            # it has a bunch of garbage attached to it, get rid of that
-            altitude = str(altitude)
-            altitude = altitude.split('\'')
-            altitude = int(altitude[1])
-        else:
-            # if we get something that is NOT a number
+        # selecting the altitude sensor
+        if self.altitudeSensor == 1:
+            # we read from the arduino
+            sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
+            altitude = sensor.readline()[:-2]
+            if altitude:
+                # it has a bunch of garbage attached to it, get rid of that
+                altitude = str(altitude)
+                altitude = altitude.split('\'')
+                altitude = int(altitude[1])
+            else:
+                altitude = -1
+        elif self.altitudeSensor == 2:
+            # we read from a directly connected sensor
+            self.sensor = None
             altitude = -1
 
         return altitude
@@ -145,7 +143,8 @@ class Model:
         # (deltaDistance * multiplier) / (deltaTime * multiplier)
         second = 1
         multiplier = second / deltaTime
+        deltaTime *= multiplier
 
-        xSpeed = (deltaDistance[0] * multiplier) / (deltaTime * multiplier)
-        ySpeed = (deltaDistance[1] * multiplier) / (deltaTime * multiplier)
+        xSpeed = (deltaDistance[0] * multiplier) / deltaTime
+        ySpeed = (deltaDistance[1] * multiplier) / deltaTime
         return (xSpeed, ySpeed)

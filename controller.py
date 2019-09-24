@@ -3,6 +3,7 @@ from view import View
 import cv2
 import sys
 import time
+import argparse
 
 class Controller:
     """docstring for Controller"""
@@ -26,8 +27,7 @@ class Controller:
             # get all the data
             frame = self.model.getFrame()
             altitude = self.model.getAltitude()
-
-            # coz altitude is not being sent in sync and is sometimes corrupted
+            # altitude is sometimes corrupted
             if altitude == -1:
                 altitude = oldAltitude
 
@@ -36,10 +36,8 @@ class Controller:
                 self.focalLen, altitude)
             scaleRuleLen *= self.pixelsPerCM
 
-            # find target
+            # find target and calculate distance to it
             target = self.model.trackTarget(frame)
-
-            # calculate distance to target
             distVector, imgCenter = self.model.calcTargetDistance(target[3],
                 frame[1], frame[2], scaleRuleLen, self.scaleLength)
 
@@ -59,7 +57,7 @@ class Controller:
             self.view.showTargetVelocity(frame, targetVelocity)
             self.view.showFrame(frame, scaleRuleLen, target[4])
 
-            # update old vals 
+            # update old values
             oldAltitude = altitude
             oldTime = curTime
             oldDistVector = distVector
@@ -71,21 +69,19 @@ class Controller:
 
 
 def main():
-    try:
-        vidSrc = sys.argv[1]
-        sensor = sys.argv[2]
-        serPort = sys.argv[3]
-    except:
-        vidSrc = 0
-        if not sensor:
-            sensor = 1
-            print('WARNING: no sensor specified, defaulting to arduino')
-        elif not serPort:
-            print('WARNING: serial port not specified')
+    parser = argparse.ArgumentParser(description = 'drop bombs on the haters')
+    parser.add_argument(
+        '-v', '--video-src', type = int, default = 0, help = 'camera to use')
+    parser.add_argument(
+        '-s', '--sensor', type = int, default = 2, help = 'altitude sensor to use')
+    parser.add_argument(
+        'serPort', nargs = '?', metavar = 'serial port', default = None,
+        help = 'serial port arduino is connected to')
+    args = parser.parse_args()
 
-    Controller(Model, View, vidSrc, sensor, serPort).run()
+
+    Controller(Model, View, args.video_src, args.sensor, args.serPort).run()
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     main()
-    
