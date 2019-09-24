@@ -7,13 +7,8 @@ import time
 class Model:
     """
     Model reads from sensors and does all the calculations
-    Args:
-    - videoSrc: camera that opencv will use
-    - altitudeSensor: which sensor to get altitude readings from
-                      1 = an arduino connected over serial port
-                      2 = a directly connected HC-SR04 ultrasonic rangefinder
-    - serialPort: the serial port that the arduino is connected to
     """
+
     def __init__(self, videoSrc, altitudeSensor, serialPort):
         # limits of green acceptable
         self.greenLower = (29, 86, 6)
@@ -26,13 +21,13 @@ class Model:
             self.sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
         elif altitudeSensor == 2:
             # read directly from the sensor
-            import RPi.GPIO as self.gpio
-            self.gpio.setmode(gpio.BCM)
+            import RPi.GPIO as gpio
+            gpio.setmode(gpio.BCM)
             # trigger and echo pins of the ultrasonic rangefinder
             self.trigger = 23
             self.echo = 24
-            self.gpio.setup(self.trigger, self.gpio.OUT)
-            self.gpio.setup(self.echo, self.gpio.IN)
+            gpio.setup(self.trigger, gpio.OUT)
+            gpio.setup(self.echo, gpio.IN)
 
         '''
          handle getting the camera
@@ -82,17 +77,17 @@ class Model:
             pulseEnd = 0
 
             # send pulse
-            self.gpio.output(self.trigger, False)
+            gpio.output(self.trigger, False)
             time.sleep(0.000002) # 2 microseconds
-            self.gpio.output(self.trigger, True)
+            gpio.output(self.trigger, True)
             time.sleep(0.000005) # 5 microseconds
-            self.gpio.output(self.trigger, False)
+            gpio.output(self.trigger, False)
 
             # count how long echo is HIGH
-            while self.gpio.input(self.echo) == 0:
+            while gpio.input(self.echo) == 0:
                 pulseStart = time.time()
 
-            while self.gpio.input(self.echo) == 1:
+            while gpio.input(self.echo) == 1:
                 pulseEnd = time.time()
 
             pulse = pulseEnd - pulseStart
