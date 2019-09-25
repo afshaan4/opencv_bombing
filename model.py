@@ -5,7 +5,6 @@ import serial
 import time
 import os
 
-# bruh way of doing this but eyyyyy
 if os.uname()[4].startswith("arm"):
     import RPi.GPIO as gpio
 
@@ -97,8 +96,6 @@ class Model:
             # sound goes 340 m/s or 29 microseconds per centimeter.
             # The ping travels out and back, so altitude is half the time
             altitude = pulse / 0.000029 / 2
-            # altitude = pulse * 17150
-            print(altitude)
 
         return altitude
 
@@ -127,7 +124,6 @@ class Model:
             ((x, y), radius) = cv2.minEnclosingCircle(c)
             M = cv2.moments(c)
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
             # x and y are the coords for the center of the min enclosing circle
             return int(x), int(y), int(radius), center, mask
         else:

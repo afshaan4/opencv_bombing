@@ -53,8 +53,8 @@ class Controller:
                 curTime - oldTime)
 
             # display all that stuff
-            self.view.showTarget(frame, target, imgCenter, distVector)
-            self.view.showTargetVelocity(frame, targetVelocity)
+            self.view.showTarget(frame, target, imgCenter)
+            self.view.showTargetData(frame, targetVelocity, distVector)
             self.view.showFrame(frame, scaleRuleLen, target[4])
 
             # update old values
