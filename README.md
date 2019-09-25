@@ -6,9 +6,12 @@ All units are in centimeters
 
 * execute `controller.py` with these arguments:
   ```bash
-  python3 controller.py <camera> <sensor mode> <serial port>
-  # like:
-  python3 controller.py 2 1 /dev/ttyACM0
+  python3 controller.py -v camera -s sensor_mode <serial port>
+  # the third argument is only needed when using sensor mode 1(arduino)
+  # with sensor mode 1:
+  python3 controller.py -v 2 -s 1 /dev/ttyACM0
+  # sensor mode 2:
+  python3 controller.py -v 2 -s 2
   ```
 
 ## Documentation:

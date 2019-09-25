@@ -96,7 +96,8 @@ class Model:
             pulse = pulseEnd - pulseStart
             # sound goes 340 m/s or 29 microseconds per centimeter.
             # The ping travels out and back, so altitude is half the time
-            altitude = pulse / 29 / 2
+            altitude = pulse / 0.000029 / 2
+            # altitude = pulse * 17150
             print(altitude)
 
         return altitude
