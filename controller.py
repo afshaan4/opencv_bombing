@@ -7,7 +7,7 @@ import argparse
 
 class Controller:
     """docstring for Controller"""
-    def __init__(self, model, view, videoSrc, sensor, serialPort):
+    def __init__(self, model, view, videoSrc, sensor, serialPort, headless):
         self.model = model(videoSrc, int(sensor), serialPort)
         self.view = view()
         # size of unit for scale rule in cm
@@ -16,6 +16,7 @@ class Controller:
         # camera parameters, change these for your camera
         self.focalLen = 0.6
         self.pixelsPerCM = 1950
+        self.headless = headless
 
 
     def run(self):
@@ -23,6 +24,7 @@ class Controller:
         oldTime = 0
         oldDistVector = (0, 0)
         running = True
+        headless = False
         while running:
             # get all the data
             frame = self.model.getFrame()
@@ -53,9 +55,12 @@ class Controller:
                 curTime - oldTime)
 
             # display all that stuff
-            self.view.showTarget(frame, target, imgCenter)
-            self.view.showTargetData(frame, targetVelocity, distVector)
-            self.view.showFrame(frame, scaleRuleLen, target[4])
+            if self.headless:
+                self.view.printData(targetVelocity, distVector, target)
+            else:
+                self.view.showTarget(frame, target, imgCenter)
+                self.view.showTargetData(frame, targetVelocity, distVector)
+                self.view.showFrame(frame, scaleRuleLen)
 
             # update old values
             oldAltitude = altitude
@@ -77,10 +82,12 @@ def main():
     parser.add_argument(
         'serPort', nargs = '?', metavar = 'serial port', default = None,
         help = 'serial port arduino is connected to')
+    parser.add_argument(
+        '--headless', action = 'store_true', help = 'disable GUI')
     args = parser.parse_args()
 
 
-    Controller(Model, View, args.video_src, args.sensor, args.serPort).run()
+    Controller(Model, View, args.video_src, args.sensor, args.serPort, args.headless).run()
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':

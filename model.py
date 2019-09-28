@@ -125,9 +125,9 @@ class Model:
             M = cv2.moments(c)
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             # x and y are the coords for the center of the min enclosing circle
-            return int(x), int(y), int(radius), center, mask
+            return (int(x), int(y), int(radius), center)
         else:
-            return (None, None, 0, (None, None), mask)
+            return (None, None, 0, (None, None))
 
 
     # USE ONE UNIT FOR ALL ARGS, cm in this case

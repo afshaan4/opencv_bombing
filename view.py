@@ -22,11 +22,25 @@ class View:
             lineType = self.fontLine)
 
 
+    # prints data out for headless mode
+    def printData(self, velocity, distVector, target):
+        center = target[3]
+        radius = target[2]
+        velocity = (round(velocity[0], 1), round(velocity[1], 1))
+        if distVector[0]:
+            distVector = (int(distVector[0]), int(distVector[1]))
+
+        if radius > 10:
+            print("pos:{}    vel:{}    dist:{}".format(center, velocity, distVector))
+        else:
+            print("pos:{}    vel:{}    dist:{}".format(0, 0, 0))
+
+
     # draws a line from the center of the image to the target, draws a circle
     # around the target
     def showTarget(self, frame, target, imgCenter):
         image = frame[0]
-        x, y, radius, center, mask = target
+        x, y, radius, center = target
 
         if radius > 10:
             # draw the line to the target
@@ -48,15 +62,12 @@ class View:
         self.drawText(image, textPos2, "target velocity " + str(velocity) + "cm/s")
 
 
-    def showFrame(self, frame, scaleRuleLen, mask):
+    def showFrame(self, frame, scaleRuleLen):
         image, imageWidth, imageHeight = frame
         textPos = (self.padding - 5, imageHeight - self.padding)
         # draw scale rule
         self.drawText(image, textPos, "10cm:")
         cv2.line(image, (self.padding * 6, imageHeight - self.padding),
             (self.padding * 6 + int(scaleRuleLen), imageHeight - self.padding), self.red, 2) 
-
-        # show the mask and image
-        cv2.imshow("target mask", mask)
         cv2.imshow("camera feed", image)
         
