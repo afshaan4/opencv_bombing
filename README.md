@@ -16,7 +16,7 @@ All units are in centimeters
 
 ## Documentation:
 
-* Camera parameters:
+* **Camera parameters:**
   all distance and speed measurements depend on knowing the focal length and the
   pixels per centimeter of you camera make sure you change these values:
   `self.focalLen` and `self.pixelsPerCM`

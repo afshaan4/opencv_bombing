@@ -103,8 +103,8 @@ class Model:
     def trackTarget(self, image):
         frame = image[0]
         # blur and convert to HSV colorspace
-        blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-        hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+        # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # make a mask for green and remove small blobs that are noise
         mask = cv2.inRange(hsv, self.greenLower, self.greenUpper)
