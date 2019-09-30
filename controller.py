@@ -24,7 +24,6 @@ class Controller:
         oldTime = 0
         oldDistVector = (0, 0)
         running = True
-        headless = False
         while running:
             # get all the data
             frame = self.model.getFrame()
@@ -56,7 +55,7 @@ class Controller:
 
             # display all that stuff
             if self.headless:
-                self.view.printData(targetVelocity, distVector, target)
+                self.view.printData(targetVelocity, distVector, altitude, target)
             else:
                 self.view.showTarget(frame, target, imgCenter)
                 self.view.showTargetData(frame, targetVelocity, distVector)
@@ -87,7 +86,9 @@ def main():
     args = parser.parse_args()
 
 
-    Controller(Model, View, args.video_src, args.sensor, args.serPort, args.headless).run()
+    Controller(Model, View, args.video_src, args.sensor, args.serPort,
+        args.headless).run()
+
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':

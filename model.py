@@ -63,7 +63,6 @@ class Model:
 
 
     def getAltitude(self):
-        # selecting the altitude sensor
         if self.altitudeSensor == 1:
             # we read from the arduino
             altitude = self.sensor.readline()[:-2]

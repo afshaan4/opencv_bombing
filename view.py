@@ -23,7 +23,7 @@ class View:
 
 
     # prints data out for headless mode
-    def printData(self, velocity, distVector, target):
+    def printData(self, velocity, distVector, altitude, target):
         center = target[3]
         radius = target[2]
         velocity = (round(velocity[0], 1), round(velocity[1], 1))
@@ -31,9 +31,11 @@ class View:
             distVector = (int(distVector[0]), int(distVector[1]))
 
         if radius > 10:
-            print("pos:{}    vel:{}    dist:{}".format(center, velocity, distVector))
+            print("pos:{}    alt:{}    vel:{}    dist:{}".format(center,
+                altitude, velocity, distVector))
         else:
-            print("pos:{}    vel:{}    dist:{}".format(0, 0, 0))
+            print("pos:{}    alt:{}    vel:{}    dist:{}".format(None, altitude,
+                None, None))
 
 
     # draws a line from the center of the image to the target, draws a circle
