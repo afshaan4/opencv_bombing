@@ -3,6 +3,7 @@ import imutils
 import re
 import serial
 import time
+import math
 import os
 
 if os.uname()[4].startswith("arm"):
@@ -167,10 +168,18 @@ class Model:
         # 1 second / deltaTime = multiplier
         # so to get speed in centimeter/second just:
         # (deltaDistance * multiplier) / (deltaTime * multiplier)
-        second = 1
-        multiplier = second / deltaTime
+        multiplier = 1 / deltaTime
         deltaTime *= multiplier
 
         xSpeed = (deltaDistance[0] * multiplier) / deltaTime
         ySpeed = (deltaDistance[1] * multiplier) / deltaTime
         return (xSpeed, ySpeed)
+
+
+    # calculate the range of the bomb, given the bombs velocity and altitude
+    # we assume the bombs launch angle is 0
+    # angles in radians, distances in centimeters
+    # formula from: https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground 
+    def calcBombRange(self, altitude, vel, angle, g):
+        return(vel*math.cos(angle)/g * (vel*math.sin(angle) + 
+            math.sqrt(vel**2 * math.sin(angle)**2 + 2*g*altitude)))
