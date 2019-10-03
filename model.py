@@ -1,6 +1,5 @@
 import cv2
 import imutils
-import re
 import serial
 import time
 import math
@@ -130,7 +129,7 @@ class Model:
         imageCenter = (int(imgWidth / 2), int(imgHeight / 2))
 
         # make sure we don't divide by zero or use None in calculations
-        if targetCenter[0] and scaleRuleLen > 0:
+        if targetCenter[0] and scaleRuleLen >= 1:
             # distance in pixels
             distanceVector = (targetCenter[0] - imageCenter[0],
                 targetCenter[1] - imageCenter[1])
@@ -146,21 +145,18 @@ class Model:
     # returns targets velocity vector relative to the center of the image
     # velocity is in cm/second
     def calcTargetVelocity(self, deltaDistance, deltaTime):
-        # 1 second / deltaTime = multiplier
-        # so to get speed in centimeter/second just:
-        # (deltaDistance * multiplier) / (deltaTime * multiplier)
-        multiplier = 1 / deltaTime
-        deltaTime *= multiplier
-
-        xSpeed = (deltaDistance[0] * multiplier) / deltaTime
-        ySpeed = (deltaDistance[1] * multiplier) / deltaTime
+        xSpeed = (deltaDistance[0]) / deltaTime
+        ySpeed = (deltaDistance[1]) / deltaTime
         return (xSpeed, ySpeed)
 
 
-    # calculate the range of the bomb, given the bombs velocity and altitude
-    # we assume the bombs launch angle is 0
-    # angles in radians, distances in centimeters
-    # formula from: https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground 
-    def calcBombRange(self, altitude, vel, angle, g):
-        return(vel*math.cos(angle)/g * (vel*math.sin(angle) + 
-            math.sqrt(vel**2 * math.sin(angle)**2 + 2*g*altitude)))
+    # calculate the range of the bomb, given its velocity and altitude
+    # we assume the launch angle is 0
+    # equation: https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground
+    def calcBombRange(self, altitude, vel, angle = 0, g = 9.8):
+        x = (vel[0]*math.cos(angle)/g * (vel[0]*math.sin(angle) + 
+            math.sqrt(vel[0]**2 * math.sin(angle)**2 + 2*g*altitude)))
+
+        y = (vel[1]*math.cos(angle)/g * (vel[1]*math.sin(angle) + 
+            math.sqrt(vel[1]**2 * math.sin(angle)**2 + 2*g*altitude)))
+        return(x, y)

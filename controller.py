@@ -49,13 +49,17 @@ class Controller:
             else:
                 deltaDistance = (0, 0)
             curTime = time.time()
-
             targetVelocity = self.model.calcTargetVelocity(deltaDistance,
                 curTime - oldTime)
 
+            # calculate the range of the bomb
+            bombRange = self.model.calcBombRange(altitude, (-targetVelocity[0],
+                -targetVelocity[1]))
+
             # display all that stuff
             if self.headless:
-                self.view.printData(targetVelocity, distVector, altitude, target)
+                self.view.printData(targetVelocity, distVector, altitude, 
+                    target, bombRange)
             else:
                 self.view.showTarget(frame, target, imgCenter)
                 self.view.showTargetData(frame, targetVelocity, distVector)
@@ -75,12 +79,12 @@ class Controller:
 def main():
     parser = argparse.ArgumentParser(description = 'drop bombs on the haters')
     parser.add_argument(
-        '-v', '--video-src', type = int, default = 0, help = 'camera to use')
+        '-v', '--video-src', type = int, default = 0, help = 'video source')
     parser.add_argument(
-        '-s', '--sensor', type = int, default = 2, help = 'altitude sensor to use')
+        '-s', '--sensor', type = int, default = 2, help = 'altitude sensor mode')
     parser.add_argument(
         'serPort', nargs = '?', metavar = 'serial port', default = None,
-        help = 'serial port arduino is connected to')
+        help = 'serial port that the arduino is connected to')
     parser.add_argument(
         '--headless', action = 'store_true', help = 'disable GUI')
     args = parser.parse_args()

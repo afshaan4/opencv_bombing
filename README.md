@@ -10,16 +10,16 @@ All units are in centimeters
   # the third argument is only needed when using sensor mode 1(arduino)
   # with sensor mode 1:
   python3 controller.py -v 2 -s 1 /dev/ttyACM0
-  # sensor mode 2:
-  python3 controller.py -v 2 -s 2
+  # sensor mode 2, headless:
+  python3 controller.py -v 2 -s 2 --headless
   ```
 
 ## Documentation:
 
 * **Camera parameters:**
-  all distance and speed measurements depend on knowing the focal length and the
-  pixels per centimeter of your camera, make sure you change these values:
-  `self.focalLen` and `self.pixelsPerCM`
+  All distance and speed measurements depend on knowing the focal length and the
+  pixels per centimeter of your camera, make sure you change these values from
+  `controller.py`:  `self.focalLen` and `self.pixelsPerCM`
 
 * **The altitude sensor:**
   There are two ways to get altitude readings, an arduino with an ultrasonic
@@ -30,3 +30,11 @@ All units are in centimeters
     it for a "deployed" setup its too slow.
 
   - The second mode is for when the thing is being used, its fast.
+
+* **Calculating where the "bomb" will land:**
+  Where the bomb will fall is calculated with this projectile range equation:
+  https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground it takes
+  the altitude of the "bomb" and the velocity of the "bomb"
+  (which is -targetVelocity).
+
+  This is done for both axes and we get a vector of where the bomb lands

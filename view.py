@@ -23,19 +23,20 @@ class View:
 
 
     # prints data out for headless mode
-    def printData(self, velocity, distVector, altitude, target):
+    def printData(self, velocity, distVector, altitude, target, bombRange):
         center = target[3]
         radius = target[2]
-        velocity = (round(velocity[0], 1), round(velocity[1], 1))
+        velocity = (round(velocity[0], 2), round(velocity[1], 2))
+        bombRange = (round(bombRange[0], 2), round(bombRange[1], 2))
         if distVector[0]:
             distVector = (int(distVector[0]), int(distVector[1]))
 
         if radius > 10:
-            print("pos:{}    alt:{}    vel:{}    dist:{}".format(center,
-                altitude, velocity, distVector))
+            print("pos:{}    alt:{}    vel:{}    bRange:{}    dist:{}"
+                .format(center, altitude, velocity, bombRange, distVector))
         else:
-            print("pos:{}    alt:{}    vel:{}    dist:{}".format(None, altitude,
-                None, None))
+            print("pos:{}    alt:{}    vel:{}    bRange:{}    dist:{}"
+                .format(None, altitude, None, None, None))
 
 
     # draws a line from the center of the image to the target, draws a circle
@@ -44,10 +45,10 @@ class View:
         image = frame[0]
         x, y, radius, center = target
 
+        cv2.circle(image, imgCenter, 2, self.green, -1)  
         if radius > 10:
             # draw the line to the target
             cv2.line(image, imgCenter, center, self.blue, 2)
-            cv2.circle(image, imgCenter, 2, self.green, -1)  
             # draw the target tracker
             cv2.circle(image, (int(x), int(y)), int(radius), self.green, 2)
             cv2.circle(image, center, 5, self.red, -1)
