@@ -15,11 +15,10 @@ class Model:
     Model reads from sensors and does all the calculations
     """
     def __init__(self, videoSrc, altitudeSensor, serialPort):
-        # limits of green acceptable
-        self.greenLower = (29, 86, 6)
-        self.greenUpper = (64, 255, 255)
-        self.serialPort = serialPort
         self.altitudeSensor = altitudeSensor
+        self.cam = cv2.VideoCapture(videoSrc)
+        self.serialPort = serialPort
+
         # have to do this only once
         if altitudeSensor == 1:
             # we read from the arduino
@@ -32,27 +31,9 @@ class Model:
             gpio.setup(self.trigger, gpio.OUT)
             gpio.setup(self.echo, gpio.IN)
 
-        '''
-         handle getting the camera
-         done like this because we need the size of the frame
-        '''
-        src = str(videoSrc).strip()
-        # Win32: handle drive lett-er ('c:', ...)
-        src = re.sub(r'(^|=)([a-zA-Z]):([/\\a-zA-Z0-9])', r'\1?disk\2?\3', src)
-        chunks = src.split(':')
-        chunks = [re.sub(r'\?disk([a-zA-Z])\?', r'\1:', s) for s in chunks]
-
-        src = chunks[0]
-        try: src = int(src)
-        except ValueError: pass
-        params = dict( s.split('=') for s in chunks[1:] )
-
-        self.cam = cv2.VideoCapture(src)
-        # add size to capture
-        if 'size' in params:
-            w, h = map(int, params['size'].split('x'))
-            self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, w)
-            self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
+        # limits of green acceptable
+        self.greenLower = (29, 86, 6)
+        self.greenUpper = (64, 255, 255)
 
 
     # return image and image dimensions
