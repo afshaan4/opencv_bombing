@@ -26,15 +26,24 @@ All units are in centimeters
   sensor and an ultrasonic sensor *directly* connected to the raspberry pi.
 
   - The first mode(arduino) is just for testing with a laptop when using it you
-    have to specify a serial port to which the arduino is connected, don't use 
+    have to specify a serial port to which the arduino is connected, don't use
     it for a "deployed" setup its too slow.
 
   - The second mode is for when the thing is being used, its fast.
 
 * **Calculating where the "bomb" will land:**
   Where the bomb will fall is calculated with this projectile range equation:
-  https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground it takes
-  the altitude of the "bomb" and the velocity of the "bomb"
-  (which is -targetVelocity).
 
-  This is done for both axes and we get a vector of where the bomb lands
+  ![range](https://wikimedia.org/api/rest_v1/media/math/render/svg/e74be30b3ea8179e1fa1f8ac9f0315f0b8fae6f4)
+
+  It takes the altitude of the "bomb" and the velocity of the "bomb"
+  (which is -targetVelocity).
+  This is done for both axes and we get a vector of where the bomb lands.
+  
+  *the equation is from this wiki: https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground*
+
+## Dependencies:
+
+* opencv 3+
+* imutils
+* pyserial(optional)

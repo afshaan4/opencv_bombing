@@ -1,9 +1,9 @@
-import cv2
-import imutils
-import serial
-import time
-import math
 import os
+import math
+import time
+import cv2
+import serial
+import imutils
 
 if os.uname()[4].startswith("arm"):
     import RPi.GPIO as gpio
@@ -11,7 +11,7 @@ if os.uname()[4].startswith("arm"):
 
 class Model:
     """
-    Model reads from sensors and does all the calculations
+    All the calculations and sensor reading happens here.
     """
     def __init__(self, videoSrc, altitudeSensor, serialPort):
         self.altitudeSensor = altitudeSensor
@@ -42,7 +42,6 @@ class Model:
         height, width = frame.shape[:2]
         return frame, width, height
 
-
     def getAltitude(self):
         if self.altitudeSensor == 1:
             # we read from the arduino
@@ -57,7 +56,6 @@ class Model:
         elif self.altitudeSensor == 2:
             pulseStart = 0
             pulseEnd = 0
-
             # send pulse
             gpio.output(self.trigger, False)
             time.sleep(0.000002) # 2 microseconds
@@ -76,9 +74,7 @@ class Model:
             # sound goes 340 m/s or 29 microseconds per centimeter.
             # The ping travels out and back, so altitude is half the time
             altitude = pulse / 0.000029 / 2
-
         return altitude
-
 
     def trackTarget(self, image):
         frame = image[0]
@@ -93,7 +89,7 @@ class Model:
 
         # find contours in the mask and try to find the ball
         cntrs = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, 
-            cv2.CHAIN_APPROX_SIMPLE)
+                                 cv2.CHAIN_APPROX_SIMPLE)
         cntrs = imutils.grab_contours(cntrs)
         center = None
 
@@ -109,7 +105,6 @@ class Model:
         else:
             return (None, None, 0, (None, None))
 
-
     # USE ONE UNIT FOR ALL ARGS, cm in this case
     # calculates the size of the *image* of an object of known size
     def calcObjImageSize(self, size, focalLen, distance):
@@ -117,7 +112,6 @@ class Model:
             return 0
         else:
             return(size * focalLen / distance)
-
 
     # returns:
     #   - imageCenter: the coordinates for the center of the image
@@ -132,15 +126,15 @@ class Model:
         if targetCenter[0] and scaleRuleLen >= 1:
             # distance in pixels
             distanceVector = (targetCenter[0] - imageCenter[0],
-                targetCenter[1] - imageCenter[1])
+                              targetCenter[1] - imageCenter[1])
             # distance in centimeters
             distanceVector = (int(distanceVector[0]) / int(scaleRuleLen),
-                int(distanceVector[1]) / int(scaleRuleLen))
-            distanceVector = (distanceVector[0] * scaleLen, distanceVector[1] * scaleLen)
+                              int(distanceVector[1]) / int(scaleRuleLen))
+            distanceVector = (distanceVector[0] * scaleLen,
+                              distanceVector[1] * scaleLen)
             return distanceVector, imageCenter
         else:
             return ((None, None), imageCenter)
-
 
     # returns targets velocity vector relative to the center of the image
     # velocity is in cm/second
@@ -149,14 +143,15 @@ class Model:
         ySpeed = (deltaDistance[1]) / deltaTime
         return (xSpeed, ySpeed)
 
-
     # calculate the range of the bomb, given its velocity and altitude
     # we assume the launch angle is 0
     # equation: https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground
     def calcBombRange(self, altitude, vel, angle = 0, g = 9.8):
-        x = (vel[0]*math.cos(angle)/g * (vel[0]*math.sin(angle) + 
-            math.sqrt(vel[0]**2 * math.sin(angle)**2 + 2*g*altitude)))
+        # Our velocity is directly opposite to the velocity of the target.
+        vel = (-vel[0], -vel[1])
+        x = (vel[0] * math.cos(angle)/g * (vel[0]*math.sin(angle)
+            + math.sqrt(vel[0]**2 * math.sin(angle)**2 + 2 * g * altitude)))
 
-        y = (vel[1]*math.cos(angle)/g * (vel[1]*math.sin(angle) + 
-            math.sqrt(vel[1]**2 * math.sin(angle)**2 + 2*g*altitude)))
+        y = (vel[1] * math.cos(angle)/g * (vel[1] * math.sin(angle)
+            + math.sqrt(vel[1]**2 * math.sin(angle)**2 + 2 * g * altitude)))
         return(x, y)

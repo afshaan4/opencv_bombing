@@ -1,12 +1,12 @@
-from model import Model
-from view import View
-import cv2
 import sys
 import time
 import argparse
+import cv2
+from model import Model
+from view import View
 
 class Controller:
-    """docstring for Controller"""
+    """The main program loop"""
     def __init__(self, model, view, videoSrc, sensor, serialPort, headless):
         self.model = model(videoSrc, int(sensor), serialPort)
         self.view = view()
@@ -33,33 +33,33 @@ class Controller:
                 altitude = oldAltitude
 
             # calculate the size of 10cm in the image
-            scaleRuleLen = self.model.calcObjImageSize(self.scaleLength,
-                self.focalLen, altitude)
+            scaleRuleLen = self.model.calcObjImageSize(
+                self.scaleLength, self.focalLen, altitude)
             scaleRuleLen *= self.pixelsPerCM
 
             # find target and calculate distance to it
             target = self.model.trackTarget(frame)
-            distVector, imgCenter = self.model.calcTargetDistance(target[3],
-                frame[1], frame[2], scaleRuleLen, self.scaleLength)
+            distVector, imgCenter = self.model.calcTargetDistance(
+                target[3], frame[1], frame[2], scaleRuleLen, self.scaleLength)
 
             # calculate target velocity
             if (distVector[0] and oldDistVector[0]):
                 deltaDistance = (oldDistVector[0] - distVector[0],
-                    oldDistVector[1] - distVector[1])
+                                 oldDistVector[1] - distVector[1])
             else:
                 deltaDistance = (0, 0)
+
             curTime = time.time()
-            targetVelocity = self.model.calcTargetVelocity(deltaDistance,
-                curTime - oldTime)
+            targetVelocity = self.model.calcTargetVelocity(
+                deltaDistance, curTime - oldTime)
 
             # calculate the range of the bomb
-            bombRange = self.model.calcBombRange(altitude, (-targetVelocity[0],
-                -targetVelocity[1]))
+            bombRange = self.model.calcBombRange(altitude, targetVelocity)
 
             # display all that stuff
             if self.headless:
-                self.view.printData(targetVelocity, distVector, altitude, 
-                    target, bombRange)
+                self.view.printData(
+                    targetVelocity, distVector, altitude, target, bombRange)
             else:
                 self.view.showTarget(frame, target, imgCenter)
                 self.view.showTargetData(frame, targetVelocity, distVector)
