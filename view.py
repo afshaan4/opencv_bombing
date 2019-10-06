@@ -31,12 +31,8 @@ class View:
         if distVector[0]:
             distVector = (int(distVector[0]), int(distVector[1]))
 
-        if radius > 10:
-            print("pos:{}    vel:{}    alt:{}    bRange:{}    dist:{}"
-                  .format(center, velocity, altitude, bombRange, distVector))
-        else:
-            print("pos:{}    vel:{}    alt:{}    bRange:{}    dist:{}"
-                  .format(None, None, altitude, None, None))
+        print("pos:{}    vel:{}    alt:{}    bRange:{}    dist:{}"
+              .format(center, velocity, altitude, bombRange, distVector))
 
 
     # draws a line from the center of the image to the target, draws a circle
@@ -45,8 +41,9 @@ class View:
         image = frame[0]
         x, y, radius, targetCenter = target
 
-        cv2.circle(image, imgCenter, 2, self.green, -1)  
-        if radius > 10:
+        cv2.circle(image, imgCenter, 2, self.green, -1)
+        # only show stuff if there is a target
+        if x:
             bombLand = (imgCenter[0] - int(bombRange[0]),
                         imgCenter[1] - int(bombRange[1]))
             # draw a line from the center to where the "bomb" will land

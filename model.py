@@ -18,11 +18,12 @@ class Model:
         self.cam = cv2.VideoCapture(videoSrc)
         self.serialPort = serialPort
 
-        # have to do this only once
+        # set up the altitude sensor
         if altitudeSensor == 1:
-            # we read from the arduino
+            # arduino
             self.sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
         elif altitudeSensor == 2:
+            # direct
             gpio.setmode(gpio.BCM)
             # trigger and echo pins of the ultrasonic rangefinder
             self.trigger = 23
@@ -33,6 +34,7 @@ class Model:
         # limits of green acceptable
         self.greenLower = (29, 86, 6)
         self.greenUpper = (64, 255, 255)
+        self.targetRadius = 10 # filter out smol targets
 
 
     # return image and image dimensions
@@ -44,7 +46,7 @@ class Model:
 
     def getAltitude(self):
         if self.altitudeSensor == 1:
-            # we read from the arduino
+            self.sensor.write(b'S') # ask for an altitude reading
             altitude = self.sensor.readline()[:-2]
             if altitude:
                 # it has a bunch of garbage attached to it, get rid of that
@@ -77,6 +79,7 @@ class Model:
         return altitude
 
     def trackTarget(self, image):
+        target = 0
         frame = image[0]
         # blur and convert to HSV colorspace
         # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
@@ -100,10 +103,14 @@ class Model:
             ((x, y), radius) = cv2.minEnclosingCircle(c)
             M = cv2.moments(c)
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-            # x and y are the coords for the center of the min enclosing circle
-            return (int(x), int(y), int(radius), center)
+
+            if radius >= self.targetRadius:
+                target = (int(x), int(y), int(radius), center)
+            else:
+                target = (None, None, 0, (None, None))
         else:
-            return (None, None, 0, (None, None))
+            target = (None, None, 0, (None, None))
+        return target
 
     # USE ONE UNIT FOR ALL ARGS, cm in this case
     # calculates the size of the *image* of an object of known size
