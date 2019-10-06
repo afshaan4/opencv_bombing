@@ -46,4 +46,5 @@ All units are in centimeters
 
 * opencv 3+
 * imutils
+* Rpi.GPIO
 * pyserial(optional)

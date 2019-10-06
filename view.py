@@ -32,26 +32,28 @@ class View:
             distVector = (int(distVector[0]), int(distVector[1]))
 
         if radius > 10:
-            print("pos:{}    alt:{}    vel:{}    bRange:{}    dist:{}"
-                  .format(center, altitude, velocity, bombRange, distVector))
+            print("pos:{}    vel:{}    alt:{}    bRange:{}    dist:{}"
+                  .format(center, velocity, altitude, bombRange, distVector))
         else:
-            print("pos:{}    alt:{}    vel:{}    bRange:{}    dist:{}"
-                  .format(None, altitude, None, None, None))
+            print("pos:{}    vel:{}    alt:{}    bRange:{}    dist:{}"
+                  .format(None, None, altitude, None, None))
 
 
     # draws a line from the center of the image to the target, draws a circle
     # around the target
-    def showTarget(self, frame, target, imgCenter):
+    def showTarget(self, frame, target, imgCenter, bombRange):
         image = frame[0]
-        x, y, radius, center = target
+        x, y, radius, targetCenter = target
 
         cv2.circle(image, imgCenter, 2, self.green, -1)  
         if radius > 10:
-            # draw the line to the target
-            cv2.line(image, imgCenter, center, self.blue, 2)
+            bombLand = (imgCenter[0] - int(bombRange[0]),
+                        imgCenter[1] - int(bombRange[1]))
+            # draw a line from the center to where the "bomb" will land
+            cv2.line(image, imgCenter, bombLand, self.blue, 2)
             # draw the target tracker
             cv2.circle(image, (int(x), int(y)), int(radius), self.green, 2)
-            cv2.circle(image, center, 5, self.red, -1)
+            cv2.circle(image, targetCenter, 5, self.red, -1)
 
 
     def showTargetData(self, frame, velocity, distVector):

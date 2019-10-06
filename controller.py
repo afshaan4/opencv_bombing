@@ -61,7 +61,7 @@ class Controller:
                 self.view.printData(
                     targetVelocity, distVector, altitude, target, bombRange)
             else:
-                self.view.showTarget(frame, target, imgCenter)
+                self.view.showTarget(frame, target, imgCenter, bombRange)
                 self.view.showTargetData(frame, targetVelocity, distVector)
                 self.view.showFrame(frame, scaleRuleLen)
 
