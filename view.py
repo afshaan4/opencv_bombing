@@ -31,8 +31,7 @@ class View:
         print("pos:{}    vel:{}    bRng:{}    alt:{}    dist:{}"
               .format(center, velocity, bombRange, int(altitude), distVector))
 
-    # draws a line from the center of the image to the target, draws a circle
-    # around the target
+    # outline target and draw "bomb" trajectory
     def showTarget(self, frame, target, imgCenter, bombRange):
         image = frame[0]
         x, y, radius, targetCenter = target
@@ -40,20 +39,21 @@ class View:
         cv2.circle(image, imgCenter, 2, self.green, -1)
         # only show stuff if there is a target
         if x:
-            bombLand = (imgCenter[0] - int(bombRange[0]),
-                        imgCenter[1] - int(bombRange[1]))
+            bombLand = (imgCenter[0] + int(bombRange[0]),
+                        imgCenter[1] + int(bombRange[1]))
             # draw a line from the center to where the "bomb" will land
             cv2.line(image, imgCenter, bombLand, self.blue, 2)
             # draw the target tracker
             cv2.circle(image, (int(x), int(y)), int(radius), self.green, 2)
             cv2.circle(image, targetCenter, 5, self.red, -1)
 
+    # show targets velocity distance on the image
     def showTargetData(self, frame, velocity, distVector):
         image = frame[0]
         textPos1 = (self.padding, self.padding * 2)
         textPos2 = (self.padding, self.padding * 4)
         velocity = (round(velocity[0], 1), round(velocity[1], 1))
-        if type(distVector[0]) == int:
+        if type(distVector[0]) == float:
             distVector = (int(distVector[0]), int(distVector[1]))
 
         self.drawText(image, textPos1, "target distance " + str(distVector) + "cm")

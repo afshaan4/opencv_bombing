@@ -27,6 +27,7 @@ class Controller:
         while running:
             # get all the data
             frame = self.model.getFrame()
+            imgCenter = (int(frame[1] / 2), int(frame[2] / 2))
             altitude = self.model.getAltitude()
             # altitude is sometimes corrupted
             if altitude == -1:
@@ -39,8 +40,8 @@ class Controller:
 
             # find target and calculate distance to it
             target = self.model.trackTarget(frame)
-            distVector, imgCenter = self.model.calcTargetDistance(
-                target[3], frame[1], frame[2], scaleRuleLen, self.scaleLength)
+            distVector = self.model.calcTargetDistance(
+                target[3], imgCenter, scaleRuleLen, self.scaleLength)
 
             # calculate target velocity
             if (distVector[0] and oldDistVector[0]):
@@ -55,6 +56,8 @@ class Controller:
 
             # calculate the range of the bomb
             bombRange = self.model.calcBombRange(altitude, targetVelocity)
+            # attempt to drop the bomb
+            hit = self.model.hit(bombRange, target, imgCenter)
 
             # display all that stuff
             if self.headless:
@@ -73,6 +76,7 @@ class Controller:
             # yeet outta here
             keyEvent = cv2.waitKey(30)
             if keyEvent == 27:
+                self.model.cleanGpio()
                 running = False
 
 

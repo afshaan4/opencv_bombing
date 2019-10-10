@@ -38,11 +38,21 @@ All units are in centimeters
 
   ![range](https://wikimedia.org/api/rest_v1/media/math/render/svg/e74be30b3ea8179e1fa1f8ac9f0315f0b8fae6f4)
 
-  It takes the altitude of the "bomb" and the velocity of the "bomb"
-  (which is -targetVelocity).
+  It takes the altitude of the "bomb" and the velocity of the "bomb", the 
+  velocity of the bomb is just the velocity of the target in the 
+  opposite direction.
   This is done for both axes and we get a vector of where the bomb lands.
   
   *the equation is from this wiki: https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground*
+
+* **The target:**
+  The "target" to drop the "bomb" on is identified by color, the program just 
+  looks for a circle of the color specified in `model.py`: 
+  ```
+  # limits of target color acceptable
+        self.targetClrLower = (29, 86, 6)
+        self.targetClrHigher = (64, 255, 255)
+  ```
 
 ## Dependencies:
 

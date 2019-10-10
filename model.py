@@ -10,33 +10,34 @@ if os.uname()[4].startswith("arm"):
 
 
 class Model:
-    """
-    All the calculations and sensor reading happens here.
-    """
+    """All the calculations and sensor reading happens here."""
     def __init__(self, videoSrc, altitudeSensor, serialPort):
         self.altitudeSensor = altitudeSensor
         self.cam = cv2.VideoCapture(videoSrc)
         self.serialPort = serialPort
+        # limits of target color acceptable
+        self.targetClrLower = (29, 86, 6)
+        self.targetClrHigher = (64, 255, 255)
+        self.targetRadius = 10 # filter out smol targets
 
         # set up the altitude sensor
         if altitudeSensor == 1:
             # arduino
             self.sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
         elif altitudeSensor == 2:
-            # direct
-            gpio.cleanup()
+            # pi
             gpio.setmode(gpio.BCM)
             # trigger and echo pins of the ultrasonic rangefinder
             self.trigger = 23
             self.echo = 24
             gpio.setup(self.trigger, gpio.OUT)
             gpio.setup(self.echo, gpio.IN)
-
-        # limits of green acceptable
-        self.greenLower = (29, 86, 6)
-        self.greenUpper = (64, 255, 255)
-        self.targetRadius = 10 # filter out smol targets
-
+             # set up the servo used to drop the "bomb"
+            dropServo = 18
+            gpio.setup(dropServo, gpio.OUT)
+            self.bombRelease = gpio.PWM(dropServo, 50) # set pwm clock to 50Hz
+            # set the servo to 90 degrees, lock "bomb" in the "bomb bay"
+            self.bombRelease.start(7.5)
 
     # return image and image dimensions
     def getFrame(self):
@@ -87,7 +88,7 @@ class Model:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # make a mask for green and remove small blobs that are noise
-        mask = cv2.inRange(hsv, self.greenLower, self.greenUpper)
+        mask = cv2.inRange(hsv, self.targetClrLower, self.targetClrHigher)
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
 
@@ -122,13 +123,11 @@ class Model:
             return(size * focalLen / distance)
 
     # returns:
-    #   - imageCenter: the coordinates for the center of the image
     #   - distanceVector: the distance to the tracked object from the center
     #       of the image in centimeters in the form (i^, j^)
     #       i^ is horizontal, j^ is vertical
-    def calcTargetDistance(self, targetCenter, imgWidth, imgHeight,
-        scaleRuleLen, scaleLen):
-        imageCenter = (int(imgWidth / 2), int(imgHeight / 2))
+    def calcTargetDistance(self, targetCenter, imageCenter,
+                           scaleRuleLen, scaleLen):
 
         # make sure we don't divide by zero or use None in calculations
         if targetCenter[0] and scaleRuleLen >= 1:
@@ -140,9 +139,9 @@ class Model:
                               int(distanceVector[1]) / int(scaleRuleLen))
             distanceVector = (distanceVector[0] * scaleLen,
                               distanceVector[1] * scaleLen)
-            return distanceVector, imageCenter
+            return distanceVector
         else:
-            return ((None, None), imageCenter)
+            return (None, None)
 
     # returns targets velocity vector relative to the center of the image
     # velocity is in cm/second
@@ -155,11 +154,26 @@ class Model:
     # we assume the launch angle is 0
     # equation: https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground
     def calcBombRange(self, altitude, vel, angle = 0, g = 9.8):
-        # Our velocity is directly opposite to the velocity of the target.
-        vel = (-vel[0], -vel[1])
         x = (vel[0] * math.cos(angle)/g * (vel[0]*math.sin(angle)
             + math.sqrt(vel[0]**2 * math.sin(angle)**2 + 2 * g * altitude)))
 
         y = (vel[1] * math.cos(angle)/g * (vel[1] * math.sin(angle)
             + math.sqrt(vel[1]**2 * math.sin(angle)**2 + 2 * g * altitude)))
         return(x, y)
+
+    # checks if the bombs trajectory will lead it to hit the target
+    def hit(self, bombRange, target, imgCenter):
+        x, y, radius, targetCenter = target
+        if targetCenter[0]:
+            bombLand = (imgCenter[0] + int(bombRange[0]),
+                        imgCenter[1] + int(bombRange[1]))
+            # if the point where the bomb will land is inside the target
+            # circle(https://math.stackexchange.com/a/198769)
+            if math.sqrt((bombLand[0] - x)**2 + (bombLand[1] - y)**2) < radius:
+                print("HIT")
+                if self.altitudeSensor == 2:
+                    self.bombRelease.ChangeDutyCycle(7.5)
+                return True
+
+    def cleanGpio(self):
+        gpio.cleanup()
