@@ -24,6 +24,7 @@ class Model:
             self.sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
         elif altitudeSensor == 2:
             # direct
+            gpio.cleanup()
             gpio.setmode(gpio.BCM)
             # trigger and echo pins of the ultrasonic rangefinder
             self.trigger = 23

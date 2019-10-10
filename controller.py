@@ -89,11 +89,10 @@ def main():
         '--headless', action = 'store_true', help = 'disable GUI')
     args = parser.parse_args()
 
-
     Controller(Model, View, args.video_src, args.sensor, args.serPort,
         args.headless).run()
-
     cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     main()

@@ -12,7 +12,6 @@ class View:
         self.fontColor = (255, 255, 255)
         self.fontLine = cv2.LINE_AA
 
-
     # draw text with an outline, so you can see it on any background
     def drawText(self, image, location, text):
         x, y = location
@@ -20,7 +19,6 @@ class View:
                     thickness = 2, lineType = self.fontLine)
         cv2.putText(image, text, (x, y), self.font, 0.4, self.fontColor,
                     lineType = self.fontLine)
-
 
     # prints data out for headless mode
     def printData(self, velocity, distVector, altitude, target, bombRange):
@@ -30,10 +28,8 @@ class View:
         bombRange = (round(bombRange[0], 2), round(bombRange[1], 2))
         if distVector[0]:
             distVector = (int(distVector[0]), int(distVector[1]))
-
-        print("pos:{}    vel:{}    alt:{}    bRange:{}    dist:{}"
-              .format(center, velocity, altitude, bombRange, distVector))
-
+        print("pos:{}    vel:{}    bRng:{}    alt:{}    dist:{}"
+              .format(center, velocity, bombRange, int(altitude), distVector))
 
     # draws a line from the center of the image to the target, draws a circle
     # around the target
@@ -52,18 +48,16 @@ class View:
             cv2.circle(image, (int(x), int(y)), int(radius), self.green, 2)
             cv2.circle(image, targetCenter, 5, self.red, -1)
 
-
     def showTargetData(self, frame, velocity, distVector):
         image = frame[0]
         textPos1 = (self.padding, self.padding * 2)
         textPos2 = (self.padding, self.padding * 4)
         velocity = (round(velocity[0], 1), round(velocity[1], 1))
-        if distVector[0]:
+        if type(distVector[0]) == int:
             distVector = (int(distVector[0]), int(distVector[1]))
 
         self.drawText(image, textPos1, "target distance " + str(distVector) + "cm")
         self.drawText(image, textPos2, "target velocity " + str(velocity) + "cm/s")
-
 
     def showFrame(self, frame, scaleRuleLen):
         image, imageWidth, imageHeight = frame

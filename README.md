@@ -5,8 +5,8 @@ All units are in centimeters
 ## Running it:
 
 * execute `controller.py` with these arguments:
-  ```bash
-  python3 controller.py -v camera -s sensor_mode <serial port> --headless
+  ```sh
+  python3 controller.py -v <camera> -s <sensor_mode> <serial port> --headless
   # the third argument is only needed when using sensor mode 1(arduino)
   # with sensor mode 1:
   python3 controller.py -v 2 -s 1 /dev/ttyACM0
@@ -17,19 +17,21 @@ All units are in centimeters
 ## Documentation:
 
 * **Camera parameters:**
-  All distance and speed measurements depend on knowing the focal length and the
-  pixels per centimeter of your camera, make sure you change these values from
-  `controller.py`:  `self.focalLen` and `self.pixelsPerCM`
+  All distance and speed measurements depend on knowing the focal length 
+  and the pixels per centimeter of your camera, make sure you change these
+  values from `controller.py`:  `self.focalLen` and `self.pixelsPerCM`
 
 * **The altitude sensor:**
   There are two ways to get altitude readings, an arduino with an ultrasonic
   sensor and an ultrasonic sensor *directly* connected to the raspberry pi.
 
-  - The first mode(arduino) is just for testing with a laptop when using it you
-    have to specify a serial port to which the arduino is connected, don't use
-    it for a "deployed" setup its too slow.
+  - Mode 1 is for when you don't have a raspberry pi.
+    Here altitude is read from an arduino that is running `rangefinder.ino`,
+    when using this mode you have to specify a serial port to which the 
+    arduino is connected.
 
-  - The second mode is for when the thing is being used, its fast.
+  - Mode 2 is for use with a raspberry pi, it gets altitude readings 
+    directly from a sensor connected to the Pi's GPIO.
 
 * **Calculating where the "bomb" will land:**
   Where the bomb will fall is calculated with this projectile range equation:
