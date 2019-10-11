@@ -76,7 +76,6 @@ class Controller:
             # yeet outta here
             keyEvent = cv2.waitKey(30)
             if keyEvent == 27:
-                self.model.cleanGpio()
                 running = False
 
 
@@ -96,6 +95,7 @@ def main():
     Controller(Model, View, args.video_src, args.sensor, args.serPort,
         args.headless).run()
     cv2.destroyAllWindows()
+    self.model.cleanGpio()
 
 
 if __name__ == '__main__':

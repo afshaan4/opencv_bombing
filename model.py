@@ -171,8 +171,9 @@ class Model:
             # circle(https://math.stackexchange.com/a/198769)
             if math.sqrt((bombLand[0] - x)**2 + (bombLand[1] - y)**2) < radius:
                 print("HIT")
+                # drop the bomb and reset
                 if self.altitudeSensor == 2:
-                    self.bombRelease.ChangeDutyCycle(7.5)
+                    self.bombRelease.ChangeDutyCycle(12.5)
                 return True
 
     def cleanGpio(self):
