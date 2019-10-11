@@ -128,7 +128,6 @@ class Model:
     #       i^ is horizontal, j^ is vertical
     def calcTargetDistance(self, targetCenter, imageCenter,
                            scaleRuleLen, scaleLen):
-
         # make sure we don't divide by zero or use None in calculations
         if targetCenter[0] and scaleRuleLen >= 1:
             # distance in pixels
@@ -162,6 +161,7 @@ class Model:
         return(x, y)
 
     # checks if the bombs trajectory will lead it to hit the target
+    # release "bomb" if it does
     def hit(self, bombRange, target, imgCenter):
         x, y, radius, targetCenter = target
         if targetCenter[0]:
@@ -175,6 +175,8 @@ class Model:
                 if self.altitudeSensor == 2:
                     self.bombRelease.ChangeDutyCycle(12.5)
                 return True
+            else:
+                return False
 
     def cleanGpio(self):
         gpio.cleanup()

@@ -2,9 +2,24 @@
 
 All units are in centimeters
 
-## Running it:
+## Using it:
 
-* execute `controller.py` with these arguments:
+* **Install dependencies:**
+  If you are using a pi just `pip3 install -r requirements.txt`, it'll get:
+
+  * opencv 3+
+  * imutils
+  * Rpi.GPIO
+
+  If you are not using a pi then get:
+
+  * opencv 3+
+  * imutils
+  * pyserial
+
+
+* **Running it**
+  execute `controller.py` with these arguments:
   ```sh
   python3 controller.py -v <camera> -s <sensor_mode> <serial port> --headless
   # the third argument is only needed when using sensor mode 1(arduino)
@@ -33,6 +48,29 @@ All units are in centimeters
   - Mode 2 is for use with a raspberry pi, it gets altitude readings 
     directly from a sensor connected to the Pi's GPIO.
 
+* **The target:**
+  The "target" to drop the "bomb" on is identified by color, the program just 
+  looks for a circle of the color specified in `model.py`: 
+  ```
+  # limits of target color acceptable
+        self.targetClrLower = (29, 86, 6)
+        self.targetClrHigher = (64, 255, 255)
+  ```
+
+## The maths:
+
+* **Measuring distances:**
+  First figure out how big 10 centimeters is on the image plane,
+  that calculation is: 
+
+  ```size_in_image = actual_size * focal_length / distance```
+
+  then to convert that to pixels: 
+  ```10_cm_in_image = size_in_image * pixels_per_cm```
+  where `pixels_per_cm` is the your cameras pixel density.
+
+  Then you can measure distances in the image with `10_cm_in_image`.
+
 * **Calculating where the "bomb" will land:**
   Where the bomb will fall is calculated with this projectile range equation:
 
@@ -44,19 +82,3 @@ All units are in centimeters
   This is done for both axes and we get a vector of where the bomb lands.
   
   *the equation is from this wiki: https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground*
-
-* **The target:**
-  The "target" to drop the "bomb" on is identified by color, the program just 
-  looks for a circle of the color specified in `model.py`: 
-  ```
-  # limits of target color acceptable
-        self.targetClrLower = (29, 86, 6)
-        self.targetClrHigher = (64, 255, 255)
-  ```
-
-## Dependencies:
-
-* opencv 3+
-* imutils
-* Rpi.GPIO
-* pyserial(optional)

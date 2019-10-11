@@ -62,7 +62,7 @@ class Controller:
             # display all that stuff
             if self.headless:
                 self.view.printData(
-                    targetVelocity, distVector, altitude, target, bombRange)
+                    targetVelocity, distVector, altitude, target, bombRange, hit)
             else:
                 self.view.showTarget(frame, target, imgCenter, bombRange)
                 self.view.showTargetData(frame, targetVelocity, distVector)

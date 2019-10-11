@@ -21,15 +21,16 @@ class View:
                     lineType = self.fontLine)
 
     # prints data out for headless mode
-    def printData(self, velocity, distVector, altitude, target, bombRange):
+    def printData(self, velocity, distVector, altitude, target, bombRange, hit):
         center = target[3]
         radius = target[2]
         velocity = (round(velocity[0], 2), round(velocity[1], 2))
         bombRange = (round(bombRange[0], 2), round(bombRange[1], 2))
         if distVector[0]:
             distVector = (int(distVector[0]), int(distVector[1]))
-        print("pos:{}    vel:{}    bRng:{}    alt:{}    dist:{}"
-              .format(center, velocity, bombRange, int(altitude), distVector))
+        print("pos:{}    vel:{}    bRng:{}    alt:{}    hit:{}    dist:{}"
+              .format(center, velocity, bombRange, int(altitude), hit,
+              distVector))
 
     # outline target and draw "bomb" trajectory
     def showTarget(self, frame, target, imgCenter, bombRange):
