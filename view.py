@@ -1,4 +1,5 @@
 import cv2
+import curses
 
 class View:
     """UI methods"""
@@ -12,15 +13,20 @@ class View:
         self.fontColor = (255, 255, 255)
         self.fontLine = cv2.LINE_AA
 
-    # draw text with an outline, so you can see it on any background
-    def drawText(self, image, location, text):
-        x, y = location
-        cv2.putText(image, text, (x + 1, y + 1), self.font, 0.4, self.black,
-                    thickness = 2, lineType = self.fontLine)
-        cv2.putText(image, text, (x, y), self.font, 0.4, self.fontColor,
-                    lineType = self.fontLine)
+    #Headless mode##############################################################
 
-    # prints data out for headless mode
+    def startCurses(self):
+        self.stdscr = curses.initscr()
+        self.stdscr.nodelay(True) # nonblocking user input
+        curses.noecho()
+        curses.cbreak()
+
+    def closeCurses(self):
+        curses.echo()
+        curses.nocbreak()
+        curses.endwin()
+
+    # prints data out
     def printData(self, velocity, distVector, altitude, target, bombRange, hit):
         center = target[3]
         radius = target[2]
@@ -28,9 +34,26 @@ class View:
         bombRange = (round(bombRange[0], 2), round(bombRange[1], 2))
         if distVector[0]:
             distVector = (int(distVector[0]), int(distVector[1]))
-        print("pos:{}    vel:{}    bRng:{}    alt:{}    hit:{}    dist:{}"
-              .format(center, velocity, bombRange, int(altitude), hit,
-              distVector))
+
+        # display everything
+        self.stdscr.erase()
+        self.stdscr.addstr(1, 1, "target position: {}".format(center))
+        self.stdscr.addstr(2, 1, "target velocity: {}".format(velocity))
+        self.stdscr.addstr(3, 1, "bomb range: {}".format(bombRange))
+        self.stdscr.addstr(4, 1, "altitude: {}".format(altitude))
+        self.stdscr.addstr(5, 1, "bomb hit: {}".format(hit))
+        self.stdscr.addstr(6, 1, "target distance: {}".format(distVector))
+        self.stdscr.refresh()
+
+    #GUI mode###################################################################
+
+    # draw text with an outline, so you can see it on any background
+    def drawText(self, image, location, text):
+        x, y = location
+        cv2.putText(image, text, (x + 1, y + 1), self.font, 0.4, self.black,
+                    thickness = 2, lineType = self.fontLine)
+        cv2.putText(image, text, (x, y), self.font, 0.4, self.fontColor,
+                    lineType = self.fontLine)
 
     # outline target and draw "bomb" trajectory
     def showTarget(self, frame, target, imgCenter, bombRange):

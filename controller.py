@@ -24,59 +24,72 @@ class Controller:
         oldTime = 0
         oldDistVector = (0, 0)
         running = True
-        while running:
-            # get all the data
-            frame = self.model.getFrame()
-            imgCenter = (int(frame[1] / 2), int(frame[2] / 2))
-            altitude = self.model.getAltitude()
-            # altitude is sometimes corrupted
-            if altitude == -1:
-                altitude = oldAltitude
-
-            # calculate the size of 10cm in the image
-            scaleRuleLen = self.model.calcObjImageSize(
-                self.scaleLength, self.focalLen, altitude)
-            scaleRuleLen *= self.pixelsPerCM
-
-            # find target and calculate distance to it
-            target = self.model.trackTarget(frame)
-            distVector = self.model.calcTargetDistance(
-                target[3], imgCenter, scaleRuleLen, self.scaleLength)
-
-            # calculate target velocity
-            if (distVector[0] and oldDistVector[0]):
-                deltaDistance = (oldDistVector[0] - distVector[0],
-                                 oldDistVector[1] - distVector[1])
-            else:
-                deltaDistance = (0, 0)
-
-            curTime = time.time()
-            targetVelocity = self.model.calcTargetVelocity(
-                deltaDistance, curTime - oldTime)
-
-            # calculate the range of the bomb
-            bombRange = self.model.calcBombRange(altitude, targetVelocity)
-            # attempt to drop the bomb
-            hit = self.model.hit(bombRange, target, imgCenter)
-
-            # display all that stuff
+        try:
             if self.headless:
-                self.view.printData(
-                    targetVelocity, distVector, altitude, target, bombRange, hit)
-            else:
-                self.view.showTarget(frame, target, imgCenter, bombRange)
-                self.view.showTargetData(frame, targetVelocity, distVector)
-                self.view.showFrame(frame, scaleRuleLen)
+                self.view.startCurses()
+            while running:
+                # get all the data
+                frame = self.model.getFrame()
+                imgCenter = (int(frame[1] / 2), int(frame[2] / 2))
+                altitude = self.model.getAltitude()
+                # altitude is sometimes corrupted
+                if altitude == -1:
+                    altitude = oldAltitude
 
-            # update old values
-            oldAltitude = altitude
-            oldTime = curTime
-            oldDistVector = distVector
+                # calculate the size of 10cm in the image
+                scaleRuleLen = self.model.calcObjImageSize(
+                    self.scaleLength, self.focalLen, altitude)
+                scaleRuleLen *= self.pixelsPerCM
 
-            # yeet outta here
-            keyEvent = cv2.waitKey(30)
-            if keyEvent == 27:
-                running = False
+                # find target and calculate distance to it
+                target = self.model.trackTarget(frame)
+                distVector = self.model.calcTargetDistance(
+                    target[3], imgCenter, scaleRuleLen, self.scaleLength)
+
+                # calculate target velocity
+                if (distVector[0] and oldDistVector[0]):
+                    deltaDistance = (oldDistVector[0] - distVector[0],
+                                     oldDistVector[1] - distVector[1])
+                else:
+                    deltaDistance = (0, 0)
+
+                curTime = time.time()
+                targetVelocity = self.model.calcTargetVelocity(
+                    deltaDistance, curTime - oldTime)
+
+                # calculate the range of the bomb
+                bombRange = self.model.calcBombRange(altitude, targetVelocity)
+                # attempt to drop the bomb
+                hit = self.model.hit(bombRange, target, imgCenter)
+
+                # display all that stuff
+                if self.headless:
+                    self.view.printData(targetVelocity, distVector, altitude,
+                                        target, bombRange, hit)
+                else:
+                    self.view.showTarget(frame, target, imgCenter, bombRange)
+                    self.view.showTargetData(frame, targetVelocity, distVector)
+                    self.view.showFrame(frame, scaleRuleLen)
+
+                # update old values
+                oldAltitude = altitude
+                oldTime = curTime
+                oldDistVector = distVector
+
+                # yeet outta here
+                if self.headless:
+                    keyEvent = self.view.usrInput()
+                    if (keyEvent == "q" or keyEvent == 27):
+                        running = False
+
+                if cv2.waitKey(30) == 27:
+                    running = False
+
+        except KeyboardInterrupt:
+            # clean stuff up
+            if self.headless:
+                self.view.closeCurses()
+            self.model.cleanGpio()
 
 
 def main():
@@ -95,7 +108,6 @@ def main():
     Controller(Model, View, args.video_src, args.sensor, args.serPort,
         args.headless).run()
     cv2.destroyAllWindows()
-    self.model.cleanGpio()
 
 
 if __name__ == '__main__':

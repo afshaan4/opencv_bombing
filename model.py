@@ -18,7 +18,7 @@ class Model:
         # limits of target color acceptable
         self.targetClrLower = (29, 86, 6)
         self.targetClrHigher = (64, 255, 255)
-        self.targetRadius = 10 # filter out smol targets
+        self.minTargetRadius = 10 # filter out smol targets
 
         # set up the altitude sensor
         if altitudeSensor == 1:
@@ -106,7 +106,7 @@ class Model:
             M = cv2.moments(c)
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
-            if radius >= self.targetRadius:
+            if radius >= self.minTargetRadius:
                 target = (int(x), int(y), int(radius), center)
             else:
                 target = (None, None, 0, (None, None))
@@ -170,7 +170,6 @@ class Model:
             # if the point where the bomb will land is inside the target
             # circle(https://math.stackexchange.com/a/198769)
             if math.sqrt((bombLand[0] - x)**2 + (bombLand[1] - y)**2) < radius:
-                print("HIT")
                 # drop the bomb and reset
                 if self.altitudeSensor == 2:
                     self.bombRelease.ChangeDutyCycle(12.5)
@@ -179,4 +178,5 @@ class Model:
                 return False
 
     def cleanGpio(self):
-        gpio.cleanup()
+        if self.altitudeSensor == 2:
+            gpio.cleanup()
