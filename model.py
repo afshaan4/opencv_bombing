@@ -2,11 +2,14 @@ import os
 import math
 import time
 import cv2
-import serial
 import imutils
 
+# deal with pi
 if os.uname()[4].startswith("arm"):
     import RPi.GPIO as gpio
+else:
+    import serial
+
 
 
 class Model:

@@ -92,4 +92,3 @@ class View:
                 (self.padding * 6 + int(scaleRuleLen), imageHeight
                 - self.padding), self.red, 2)
         cv2.imshow("camera feed", image)
-        

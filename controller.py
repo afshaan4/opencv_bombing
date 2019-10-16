@@ -76,26 +76,22 @@ class Controller:
                 oldTime = curTime
                 oldDistVector = distVector
 
-                # yeet outta here
-                if self.headless:
-                    keyEvent = self.view.usrInput()
-                    if (keyEvent == "q" or keyEvent == 27):
-                        running = False
-
-                if cv2.waitKey(30) == 27:
+                keyEvent = cv2.waitKey(30)
+                if keyEvent == 27:
                     running = False
 
-        except KeyboardInterrupt:
-            # clean stuff up
+        except (KeyboardInterrupt, AttributeError) as e:
+            # always clean up before crashing
             if self.headless:
                 self.view.closeCurses()
             self.model.cleanGpio()
+            raise e
 
 
 def main():
     parser = argparse.ArgumentParser(description = 'drop bombs on the haters')
     parser.add_argument(
-        '-v', '--video-src', type = int, default = 0, help = 'video source')
+        '-v', '--video-src', type = int, default = 0, help = 'which camera to use')
     parser.add_argument(
         '-s', '--sensor', type = int, default = 2, help = 'altitude sensor mode')
     parser.add_argument(
