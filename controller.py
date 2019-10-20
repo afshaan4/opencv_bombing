@@ -20,16 +20,18 @@ class Controller:
 
 
     def run(self):
-        oldAltitude = 0
-        oldTime = 0
-        oldDistVector = (0, 0)
-        bombEnabled = False
-        running = True
-        hit = False
+        state = { # the "app" state
+            "oldAltitude": 0,
+            "oldTime": 0,
+            "oldDistVector": (0, 0),
+            "bombEnabled": False,
+            "running": True,
+            "hit": False,
+        }
         try:
             if self.headless:
                 self.view.startCurses()
-            while running:
+            while state["running"]:
                 ################################################################
                 # Get data
                 ################################################################
@@ -38,7 +40,7 @@ class Controller:
                 altitude = self.model.getAltitude()
                 # altitude is sometimes corrupted
                 if altitude == -1:
-                    altitude = oldAltitude
+                    altitude = state["oldAltitude"]
 
                 ################################################################
                 # Do calculations
@@ -55,57 +57,58 @@ class Controller:
                     target[3], imgCenter, scaleRuleLen, self.scaleLength)
 
                 # calculate target velocity
-                if (distVector[0] and oldDistVector[0]):
-                    deltaDistance = (oldDistVector[0] - distVector[0],
-                                     oldDistVector[1] - distVector[1])
+                if (distVector[0] and state["oldDistVector"][0]):
+                    deltaDistance = (state["oldDistVector"][0] - distVector[0],
+                                     state["oldDistVector"][1] - distVector[1])
                 else:
                     deltaDistance = (0, 0)
 
                 curTime = time.time()
                 targetVelocity = self.model.calcTargetVelocity(
-                    deltaDistance, curTime - oldTime)
+                    deltaDistance, curTime - state["oldTime"])
 
                 # calculate the range of the "bomb"
                 bombRange = self.model.calcBombRange(altitude, targetVelocity)
                 # attempt to drop the "bomb"
-                if bombEnabled:
-                    hit = self.model.hit(bombRange, target, imgCenter)
+                if state["bombEnabled"]:
+                    state["hit"] = self.model.hit(bombRange, target, imgCenter)
 
                 ################################################################
                 # display calls and "event handlers"
                 ################################################################
                 if self.headless:
                     self.view.printData(targetVelocity, distVector, altitude,
-                                        target, bombRange, hit, bombEnabled)
+                                        target, bombRange, state["hit"],
+                                        state["bombEnabled"])
 
                     headlessKeyEvent = self.view.checkKeys()
                     if (headlessKeyEvent == ord("q")):
                         # quit headless mode
                         self.view.closeCurses()
                         self.model.cleanGpio()
-                        running = False
+                        state["running"] = False
 
                     if (headlessKeyEvent == ord("e")):
                         # "bombs" hot
-                        bombEnabled = True
+                        state["bombEnabled"] = True
                 else:
                     self.view.showTarget(frame, target, imgCenter, bombRange)
                     self.view.showTargetData(frame, targetVelocity, distVector)
                     self.view.showFrame(frame, scaleRuleLen)
 
-                    keyEvent = cv2.waitKey(30)
-                    if keyEvent == 27:
+                    guiKeyEvent = cv2.waitKey(30)
+                    if guiKeyEvent == 27:
                         # quit gui mode
                         self.model.cleanGpio()
-                        running = False
-                    elif keyEvent == ord("e"):
+                        state["running"] = False
+                    elif guiKeyEvent == ord("e"):
                         # enable "bomb"
-                        bombEnabled = True
+                        state["bombEnabled"] = True
 
                 # update old values
-                oldAltitude = altitude
-                oldTime = curTime
-                oldDistVector = distVector
+                state["oldAltitude"] = altitude
+                state["oldTime"] = curTime
+                state["oldDistVector"] = distVector
 
         except (KeyboardInterrupt, AttributeError) as e:
             # always clean up before crashing
