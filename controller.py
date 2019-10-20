@@ -23,12 +23,16 @@ class Controller:
         oldAltitude = 0
         oldTime = 0
         oldDistVector = (0, 0)
+        bombEnabled = False
         running = True
+        hit = False
         try:
             if self.headless:
                 self.view.startCurses()
             while running:
-                # get all the data
+                ################################################################
+                # Get data
+                ################################################################
                 frame = self.model.getFrame()
                 imgCenter = (int(frame[1] / 2), int(frame[2] / 2))
                 altitude = self.model.getAltitude()
@@ -36,7 +40,11 @@ class Controller:
                 if altitude == -1:
                     altitude = oldAltitude
 
-                # calculate the size of 10cm in the image
+                ################################################################
+                # Do calculations
+                ################################################################
+                # calculate the size of 10cm in the image, we use this
+                # to do all measurements
                 scaleRuleLen = self.model.calcObjImageSize(
                     self.scaleLength, self.focalLen, altitude)
                 scaleRuleLen *= self.pixelsPerCM
@@ -57,28 +65,47 @@ class Controller:
                 targetVelocity = self.model.calcTargetVelocity(
                     deltaDistance, curTime - oldTime)
 
-                # calculate the range of the bomb
+                # calculate the range of the "bomb"
                 bombRange = self.model.calcBombRange(altitude, targetVelocity)
-                # attempt to drop the bomb
-                hit = self.model.hit(bombRange, target, imgCenter)
+                # attempt to drop the "bomb"
+                if bombEnabled:
+                    hit = self.model.hit(bombRange, target, imgCenter)
 
-                # display all that stuff
+                ################################################################
+                # display calls and "event handlers"
+                ################################################################
                 if self.headless:
                     self.view.printData(targetVelocity, distVector, altitude,
-                                        target, bombRange, hit)
+                                        target, bombRange, hit, bombEnabled)
+
+                    headlessKeyEvent = self.view.checkKeys()
+                    if (headlessKeyEvent == ord("q")):
+                        # quit headless mode
+                        self.view.closeCurses()
+                        self.model.cleanGpio()
+                        running = False
+
+                    if (headlessKeyEvent == ord("e")):
+                        # "bombs" hot
+                        bombEnabled = True
                 else:
                     self.view.showTarget(frame, target, imgCenter, bombRange)
                     self.view.showTargetData(frame, targetVelocity, distVector)
                     self.view.showFrame(frame, scaleRuleLen)
 
+                    keyEvent = cv2.waitKey(30)
+                    if keyEvent == 27:
+                        # quit gui mode
+                        self.model.cleanGpio()
+                        running = False
+                    elif keyEvent == ord("e"):
+                        # enable "bomb"
+                        bombEnabled = True
+
                 # update old values
                 oldAltitude = altitude
                 oldTime = curTime
                 oldDistVector = distVector
-
-                keyEvent = cv2.waitKey(30)
-                if keyEvent == 27:
-                    running = False
 
         except (KeyboardInterrupt, AttributeError) as e:
             # always clean up before crashing

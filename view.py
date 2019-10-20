@@ -27,7 +27,8 @@ class View:
         curses.endwin()
 
     # prints data out
-    def printData(self, velocity, distVector, altitude, target, bombRange, hit):
+    def printData(self, velocity, distVector,
+                  altitude, target, bombRange, hit, bombEnabled):
         center = target[3]
         radius = target[2]
         velocity = (round(velocity[0], 2), round(velocity[1], 2))
@@ -40,10 +41,15 @@ class View:
         self.stdscr.addstr(1, 1, "target position: {}".format(center))
         self.stdscr.addstr(2, 1, "target velocity: {}".format(velocity))
         self.stdscr.addstr(3, 1, "bomb range: {}".format(bombRange))
-        self.stdscr.addstr(4, 1, "altitude: {}".format(altitude))
+        self.stdscr.addstr(4, 1, "altitude: {}".format(int(altitude)))
         self.stdscr.addstr(5, 1, "bomb hit: {}".format(hit))
-        self.stdscr.addstr(6, 1, "target distance: {}".format(distVector))
+        self.stdscr.addstr(6, 1, "bomb Enabled: {}".format(bombEnabled))
+        self.stdscr.addstr(7, 1, "target distance: {}".format(distVector))
         self.stdscr.refresh()
+
+    # lol just return keyEvents
+    def checkKeys(self):
+        return self.stdscr.getch()
 
     #GUI mode###################################################################
 

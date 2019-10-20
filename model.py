@@ -26,7 +26,8 @@ class Model:
         # set up the altitude sensor
         if altitudeSensor == 1:
             # arduino
-            self.sensor = serial.Serial(str(self.serialPort), 9600, timeout=.1)
+            self.sensor = serial.Serial(str(self.serialPort), 9600,
+                                        timeout = 0.1, write_timeout = 0.1)
         elif altitudeSensor == 2:
             # pi
             gpio.setmode(gpio.BCM)
@@ -40,9 +41,9 @@ class Model:
             gpio.setup(dropServo, gpio.OUT)
             self.bombRelease = gpio.PWM(dropServo, 50) # set pwm clock to 50Hz
             # set the servo to 90 degrees, lock "bomb" in the "bomb bay"
-            self.bombRelease.start(7.5)
+            self.bombRelease.start(12.5)
 
-    # return image and image dimensions
+    # return image with its dimensions
     def getFrame(self):
         ret, frame = self.cam.read()
         frame = imutils.resize(frame, width=600)
@@ -76,6 +77,9 @@ class Model:
 
             while gpio.input(self.echo) == 1:
                 pulseEnd = time.time()
+                # if its taking too long give up, so we don't hang
+                if pulseEnd - pulseStart >= 1:
+                    break
 
             pulse = pulseEnd - pulseStart
             # sound goes 340 m/s or 29 microseconds per centimeter.
@@ -173,9 +177,9 @@ class Model:
             # if the point where the bomb will land is inside the target
             # circle(https://math.stackexchange.com/a/198769)
             if math.sqrt((bombLand[0] - x)**2 + (bombLand[1] - y)**2) < radius:
-                # drop the bomb and reset
+                # drop the bomb
                 if self.altitudeSensor == 2:
-                    self.bombRelease.ChangeDutyCycle(12.5)
+                    self.bombRelease.ChangeDutyCycle(7.5)
                 return True
             else:
                 return False
