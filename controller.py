@@ -20,13 +20,13 @@ class Controller:
 
 
     def run(self):
-        state = { # the "app" state
+        state = {
             "oldAltitude": 0,
             "oldTime": 0,
             "oldDistVector": (0, 0),
             "bombEnabled": False,
             "running": True,
-            "hit": False,
+            "hit": False
         }
         try:
             if self.headless:

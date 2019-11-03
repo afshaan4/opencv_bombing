@@ -34,10 +34,13 @@ All units are in centimeters
 * **Camera parameters:**
   All distance and speed measurements depend on knowing the focal length 
   and the pixels per centimeter of your camera, make sure you change these
-  values from `controller.py`:  `self.focalLen` and `self.pixelsPerCM`
+  values to those of your camera, they're in `controller.py`: 
+
+  * `self.focalLen` 
+  * `self.pixelsPerCM`
 
 * **The altitude sensor:**
-  There are two ways to get altitude readings, an arduino with an ultrasonic
+  There are two ways to get altitude readings: an arduino with an ultrasonic
   sensor and an ultrasonic sensor *directly* connected to the raspberry pi.
 
   - Mode 1 is for when you don't have a raspberry pi.
@@ -47,6 +50,9 @@ All units are in centimeters
 
   - Mode 2 is for use with a raspberry pi, it gets altitude readings 
     directly from a sensor connected to the Pi's GPIO.
+
+  The sensor I am using(HC-SR04) has a max range of 4 meters, for a practical
+  setup use a LIDAR with enough range.
 
 * **The target:**
   The "target" to drop the "bomb" on is identified by color, the program just 
@@ -76,9 +82,9 @@ All units are in centimeters
 
   ![range](https://wikimedia.org/api/rest_v1/media/math/render/svg/e74be30b3ea8179e1fa1f8ac9f0315f0b8fae6f4)
 
-  It takes the altitude of the "bomb" and the velocity of the "bomb", the 
-  velocity of the bomb is just the velocity of the target in the 
-  opposite direction.
+  It takes the altitude(`y0`) of the "bomb", the angle the "bomb" is dropped at
+  which is zero ,and the velocity(`v`) of the "bomb", the velocity of the 
+  "bomb" is just the velocity of the target in the opposite direction.
   This is done for both axes and we get a vector of where the bomb lands.
   
   *the equation is from this wiki: https://en.wikipedia.org/wiki/Range_of_a_projectile#Uneven_ground*

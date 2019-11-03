@@ -43,8 +43,8 @@ class View:
         self.stdscr.addstr(3, 1, "bomb range: {}".format(bombRange))
         self.stdscr.addstr(4, 1, "altitude: {}".format(int(altitude)))
         self.stdscr.addstr(5, 1, "bomb hit: {}".format(hit))
-        self.stdscr.addstr(6, 1, "bomb Enabled: {}".format(bombEnabled))
-        self.stdscr.addstr(7, 1, "target distance: {}".format(distVector))
+        self.stdscr.addstr(6, 1, "target distance: {}".format(distVector))
+        self.stdscr.addstr(8, 1, "bomb Enabled: {}".format(bombEnabled))
         self.stdscr.refresh()
 
     # lol just return keyEvents
